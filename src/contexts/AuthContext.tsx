@@ -6,6 +6,7 @@ interface User {
   name: string;
   email: string;
   plan: "free" | "pro";
+  onboarding_completed: boolean;
 }
 
 interface AuthContextData {

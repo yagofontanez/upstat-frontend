@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import {
   Activity,
@@ -8,6 +9,9 @@ import {
 } from "lucide-react";
 import { getMonitors, type Monitor } from "../services/monitors";
 import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { getMyPage } from "../services/pages";
+import { OnboardingModal } from "../components/OnboardingModal";
 
 function UptimeIndicator({ uptime }: { uptime: string | null }) {
   if (!uptime) return <span style={{ color: "#555" }}>—</span>;
@@ -66,10 +70,23 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function DashboardPage() {
+  const { user, refreshUser } = useAuth();
+
+  console.log(user, "user");
+
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [statusSlug, setStatusSlug] = useState("");
 
   useEffect(() => {
+    if (!user?.onboarding_completed) {
+      getMyPage().then((page) => {
+        setStatusSlug(page.slug);
+        setShowOnboarding(true);
+      });
+    }
+
     function fetchData() {
       getMonitors()
         .then(setMonitors)
@@ -113,6 +130,16 @@ export function DashboardPage() {
 
   return (
     <div style={{ fontFamily: "'JetBrains Mono', 'Courier New', monospace" }}>
+      {showOnboarding && (
+        <OnboardingModal
+          userName={user!.name}
+          statusSlug={statusSlug}
+          onComplete={async () => {
+            await refreshUser();
+            setShowOnboarding(false);
+          }}
+        />
+      )}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
         @keyframes fadeUp {
