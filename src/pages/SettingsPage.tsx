@@ -185,6 +185,29 @@ export function SettingsPage() {
       </div>
 
       <div className="bg-[#111827] rounded-xl border border-white/10 p-6 mt-6">
+        <h3 className="text-white font-semibold mb-1">Badge para README</h3>
+        <p className="text-gray-500 text-sm mb-4">
+          Cole no README do seu projeto no GitHub para mostrar o status em tempo
+          real.
+        </p>
+
+        <div className="bg-[#0A0E1A] border border-white/10 rounded-lg p-4 mb-4">
+          <p className="text-gray-500 text-xs mb-2">Preview</p>
+          <img
+            src={`${import.meta.env.VITE_API_URL}/badge/${originalSlug}`}
+            alt="uptime badge"
+          />
+        </div>
+
+        <div className="bg-[#0A0E1A] border border-white/10 rounded-lg p-4">
+          <p className="text-gray-500 text-xs mb-2">Markdown</p>
+          <code className="text-[#00D4AA] text-xs break-all">
+            {`![uptime](${import.meta.env.VITE_API_URL}/badge/${originalSlug})`}
+          </code>
+        </div>
+      </div>
+
+      <div className="bg-[#111827] rounded-xl border border-white/10 p-6 mt-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-white font-semibold">Status Page</h3>
           <a
