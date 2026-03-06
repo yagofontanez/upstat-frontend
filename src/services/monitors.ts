@@ -15,6 +15,10 @@ export interface Monitor {
   ssl_days_remaining: number | null;
   ssl_valid_until: string | null;
   keyword: string | null;
+  dns_valid: boolean | null;
+  dns_checked_at: string | null;
+  monitor_type: "http" | "tcp";
+  tcp_port: number | null;
 }
 
 export async function getMonitors() {
@@ -26,6 +30,8 @@ export async function createMonitor(data: {
   name: string;
   url: string;
   keyword?: string;
+  monitor_type?: "http" | "tcp";
+  tcp_port?: number;
 }) {
   const res = await api.post("/monitors", data);
   return res.data.monitor as Monitor;

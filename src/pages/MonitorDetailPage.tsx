@@ -141,7 +141,7 @@ export function MonitorDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-5 gap-4 mb-8">
         <div className="bg-[#111827] rounded-xl p-5 border border-white/10">
           <p className="text-gray-500 text-xs mb-1 uppercase tracking-wide">
             Status
@@ -195,6 +195,18 @@ export function MonitorDetailPage() {
             <p className="text-lg font-bold text-green-400">
               {monitor.ssl_days_remaining}d restantes
             </p>
+          )}
+        </div>
+        <div className="bg-[#111827] rounded-xl p-5 border border-white/10">
+          <p className="text-gray-500 text-xs mb-1 uppercase tracking-wide">
+            DNS
+          </p>
+          {monitor.dns_valid === null || monitor.dns_valid === undefined ? (
+            <p className="text-lg font-bold text-gray-600">—</p>
+          ) : monitor.dns_valid ? (
+            <p className="text-lg font-bold text-green-400">Resolvendo</p>
+          ) : (
+            <p className="text-lg font-bold text-red-400">Falhou</p>
           )}
         </div>
       </div>
