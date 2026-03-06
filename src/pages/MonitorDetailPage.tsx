@@ -141,7 +141,7 @@ export function MonitorDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="bg-[#111827] rounded-xl p-5 border border-white/10">
           <p className="text-gray-500 text-xs mb-1 uppercase tracking-wide">
             Status
@@ -176,6 +176,26 @@ export function MonitorDetailPage() {
             Latência média
           </div>
           <p className="text-lg font-bold text-white">{avgLatency ?? "—"}ms</p>
+        </div>
+        <div className="bg-[#111827] rounded-xl p-5 border border-white/10">
+          <p className="text-gray-500 text-xs mb-1 uppercase tracking-wide">
+            SSL
+          </p>
+          {monitor.ssl_days_remaining === null ? (
+            <p className="text-lg font-bold text-gray-600">—</p>
+          ) : monitor.ssl_days_remaining <= 7 ? (
+            <p className="text-lg font-bold text-red-400">
+              {monitor.ssl_days_remaining}d restantes
+            </p>
+          ) : monitor.ssl_days_remaining <= 30 ? (
+            <p className="text-lg font-bold text-yellow-400">
+              {monitor.ssl_days_remaining}d restantes
+            </p>
+          ) : (
+            <p className="text-lg font-bold text-green-400">
+              {monitor.ssl_days_remaining}d restantes
+            </p>
+          )}
         </div>
       </div>
 

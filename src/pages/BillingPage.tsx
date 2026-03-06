@@ -52,7 +52,7 @@ export function BillingPage() {
           </p>
           <ul className="space-y-3">
             {[
-              "1 monitor",
+              "3 monitores",
               "Ping a cada 5 minutos",
               "Histórico de 7 dias",
               "URL aleatória",

@@ -4,17 +4,16 @@ export interface Monitor {
   id: string;
   name: string;
   url: string;
-  status: "pending" | "up" | "down" | "degraded";
-  interval_minutes: number;
+  status: "up" | "down" | "pending";
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  uptime_7d: string | null;
   last_ping: {
     status: string;
     latency_ms: number;
     checked_at: string;
   } | null;
-  uptime_7d: string | null;
+  ssl_days_remaining: number | null;
+  ssl_valid_until: string | null;
 }
 
 export async function getMonitors() {

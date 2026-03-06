@@ -9,6 +9,7 @@ import {
   pingNow,
 } from "../services/monitors";
 import { useNavigate } from "react-router-dom";
+import { UpgradeModal } from "../components/UpgradeModal";
 
 export function MonitorsPage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export function MonitorsPage() {
   const [showForm, setShowForm] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshed, setRefreshed] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
@@ -70,9 +72,14 @@ export function MonitorsPage() {
       setName("");
       setUrl("");
       setShowForm(false);
-    } catch (err) {
-      setError("Erro ao criar monitor");
-      console.log("Erro ao criar monitor: ", err);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        setShowForm(false);
+        setShowUpgradeModal(true);
+      } else {
+        setError(err.response?.data?.error || "Erro ao criar monitor");
+      }
     } finally {
       setCreating(false);
     }
@@ -292,6 +299,9 @@ export function MonitorsPage() {
           </div>
         )}
       </div>
+      {showUpgradeModal && (
+        <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
+      )}
     </div>
   );
 }

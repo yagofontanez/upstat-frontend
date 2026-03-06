@@ -8,9 +8,17 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getMonitors()
-      .then(setMonitors)
-      .finally(() => setLoading(false));
+    function fetchData() {
+      getMonitors()
+        .then(setMonitors)
+        .finally(() => setLoading(false));
+    }
+
+    fetchData();
+
+    const interval = setInterval(fetchData, 60000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const total = monitors.length;
@@ -28,7 +36,13 @@ export function DashboardPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-white text-2xl font-bold">Dashboard</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-white text-2xl font-bold">Dashboard</h2>
+          <div className="flex items-center gap-1.5 text-xs text-gray-600">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#00D4AA] animate-pulse" />
+            ao vivo
+          </div>
+        </div>
         <p className="text-gray-500 text-sm mt-1">
           Visão geral dos seus monitores
         </p>
