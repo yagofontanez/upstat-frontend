@@ -2,7 +2,7 @@
   const SLUG = document.currentScript.getAttribute("data-slug");
   const API =
     document.currentScript.getAttribute("data-api") ||
-    "https://api.upstat.online";
+    "https://upstat-backend.onrender.com/api";
 
   if (!SLUG) return;
 
