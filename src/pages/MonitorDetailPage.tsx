@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Clock, Activity } from "lucide-react";
+import { ArrowLeft, Clock, Activity, Download } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -19,6 +19,7 @@ import {
   type Incident,
 } from "../services/monitorDetails";
 import { useAuth } from "../hooks/useAuth";
+import { api } from "../services/api";
 
 function formatDuration(ms: number) {
   const minutes = Math.floor(ms / 60000);
@@ -102,6 +103,19 @@ export function MonitorDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  async function handleExport() {
+    const res = await api.get(`/monitors/${id}/export`, {
+      responseType: "blob",
+    });
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `upstat-${monitor?.name}-${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -139,6 +153,27 @@ export function MonitorDetailPage() {
           <h2 className="text-white text-2xl font-bold">{monitor.name}</h2>
           <p className="text-gray-500 text-sm">{monitor.url}</p>
         </div>
+        {user?.plan === "pro" ? (
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-gray-400 hover:text-white text-sm transition-all"
+          >
+            <Download size={14} />
+            Exportar CSV
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate("/billing")}
+            className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-600 text-sm cursor-pointer hover:border-[#00D4AA]/30 hover:text-[#00D4AA] transition-all"
+            title="Disponível no plano Pro"
+          >
+            <Download size={14} />
+            Exportar CSV
+            <span className="text-xs bg-[#00D4AA]/10 text-[#00D4AA] px-1.5 py-0.5 rounded">
+              Pro
+            </span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-5 gap-4 mb-8">
