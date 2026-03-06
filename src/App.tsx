@@ -10,6 +10,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { StatusPage } from "./pages/StatusPage";
 import { BillingPage } from "./pages/BillingPage";
 import { MonitorDetailPage } from "./pages/MonitorDetailPage";
+import { DependenciesPage } from "./pages/DepenciesPage";
 
 export default function App() {
   return (
@@ -62,6 +63,16 @@ export default function App() {
           <PrivateRoute>
             <Layout>
               <MonitorDetailPage />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/dependencies"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <DependenciesPage />
             </Layout>
           </PrivateRoute>
         }

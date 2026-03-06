@@ -1,11 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Activity, Settings, LogOut, Zap } from "lucide-react";
+import {
+  LayoutDashboard,
+  Activity,
+  Settings,
+  LogOut,
+  Zap,
+  GitBranch,
+} from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Monitores", icon: Activity, path: "/monitors" },
   { label: "Plano", icon: Zap, path: "/billing" },
+  { label: "Dependências", icon: GitBranch, path: "/dependencies" },
   { label: "Configurações", icon: Settings, path: "/settings" },
 ];
 
