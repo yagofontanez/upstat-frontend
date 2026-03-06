@@ -102,6 +102,10 @@ export function SettingsPage() {
   const [pageError, setPageError] = useState("");
   const [monitors, setMonitors] = useState<{ id: string; name: string }[]>([]);
   const [selectedMonitorIds, setSelectedMonitorIds] = useState<string[]>([]);
+  const [slackWebhook, setSlackWebhook] = useState("");
+  const [slackEnabled, setSlackEnabled] = useState(false);
+  const [savingSlack, setSavingSlack] = useState(false);
+  const [slackSuccess, setSlackSuccess] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -120,6 +124,8 @@ export function SettingsPage() {
         setMonitors(monitorsRes.data.monitors);
         setSelectedMonitorIds(page.monitor_ids || []);
         setPushEnabled(pushSubscribed);
+        setSlackEnabled(notifRes.data.notifications.slack_enabled ?? false);
+        setSlackWebhook(notifRes.data.notifications.slack_webhook_url ?? "");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -136,6 +142,21 @@ export function SettingsPage() {
       }
     } finally {
       setPushLoading(false);
+    }
+  }
+
+  async function handleSaveSlack() {
+    setSavingSlack(true);
+    setSlackSuccess(false);
+    try {
+      await api.put("/settings/slack", {
+        slack_webhook_url: slackWebhook,
+        slack_enabled: slackEnabled,
+      });
+      setSlackSuccess(true);
+      setTimeout(() => setSlackSuccess(false), 3000);
+    } finally {
+      setSavingSlack(false);
     }
   }
 
@@ -410,6 +431,85 @@ export function SettingsPage() {
       </div>
 
       <div className="set-fade-3">
+        <Section title="Slack" icon={<Bell size={14} />}>
+          <p
+            style={{
+              color: "#555",
+              fontSize: "12px",
+              marginBottom: "16px",
+              lineHeight: 1.6,
+            }}
+          >
+            Receba alertas de downtime direto no seu canal do Slack.{" "}
+            <a
+              href="https://api.slack.com/messaging/webhooks"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "#00D4AA" }}
+            >
+              Como criar um webhook →
+            </a>
+          </p>
+
+          <div style={{ marginBottom: "14px" }}>
+            <label style={labelStyle}>Webhook URL</label>
+            <input
+              type="url"
+              value={slackWebhook}
+              onChange={(e) => setSlackWebhook(e.target.value)}
+              style={inputStyle}
+              className="input-focus"
+              placeholder="https://hooks.slack.com/services/..."
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "20px",
+            }}
+          >
+            <div>
+              <p
+                style={{
+                  color: "#F0F6FC",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  margin: "0 0 2px",
+                }}
+              >
+                Ativar notificações
+              </p>
+              <p style={{ color: "#555", fontSize: "11px", margin: 0 }}>
+                Enviar alerta quando monitor cair ou recuperar
+              </p>
+            </div>
+            <Toggle
+              enabled={slackEnabled}
+              onChange={() => setSlackEnabled(!slackEnabled)}
+            />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <button
+              onClick={handleSaveSlack}
+              disabled={savingSlack}
+              style={{ ...saveBtn, opacity: savingSlack ? 0.5 : 1 }}
+            >
+              {savingSlack ? "Salvando..." : "Salvar"}
+            </button>
+            {slackSuccess && (
+              <span style={{ fontSize: "12px", color: "#22C55E" }}>
+                ✓ Salvo
+              </span>
+            )}
+          </div>
+        </Section>
+      </div>
+
+      <div className="set-fade-4">
         <Section title="Badge para README" icon={<Code size={14} />}>
           <p
             style={{
@@ -479,7 +579,7 @@ export function SettingsPage() {
         </Section>
       </div>
 
-      <div className="set-fade-4">
+      <div className="set-fade-5">
         <Section title="Widget para seu site" icon={<Code size={14} />}>
           <p
             style={{
@@ -524,7 +624,7 @@ export function SettingsPage() {
         </Section>
       </div>
 
-      <div className="set-fade-5">
+      <div className="set-fade-6">
         <div
           style={{
             background: "#0D1117",

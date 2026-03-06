@@ -32,6 +32,7 @@ export async function createMonitor(data: {
   keyword?: string;
   monitor_type?: "http" | "tcp";
   tcp_port?: number;
+  sla_target?: number;
 }) {
   const res = await api.post("/monitors", data);
   return res.data.monitor as Monitor;

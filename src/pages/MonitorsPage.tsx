@@ -21,6 +21,7 @@ import {
 } from "../services/monitors";
 import { useNavigate } from "react-router-dom";
 import { UpgradeModal } from "../components/UpgradeModal";
+import { useAuth } from "../hooks/useAuth";
 
 function StatusBadge({ status }: { status: string }) {
   const config = {
@@ -85,6 +86,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function MonitorsPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [pinging, setPinging] = useState<string | null>(null);
   const [monitors, setMonitors] = useState<Monitor[]>([]);
@@ -100,6 +102,7 @@ export function MonitorsPage() {
   const [keyword, setKeyword] = useState("");
   const [monitorType, setMonitorType] = useState<"http" | "tcp">("http");
   const [tcpPort, setTcpPort] = useState("");
+  const [slaTarget, setSlaTarget] = useState("99.9");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -149,6 +152,7 @@ export function MonitorsPage() {
         keyword: keyword || undefined,
         monitor_type: monitorType,
         tcp_port: tcpPort ? parseInt(tcpPort) : undefined,
+        sla_target: parseFloat(slaTarget) || 99.9,
       });
       setMonitors((prev) => [...prev, monitor]);
       setName("");
@@ -156,6 +160,7 @@ export function MonitorsPage() {
       setKeyword("");
       setMonitorType("http");
       setTcpPort("");
+      setSlaTarget("99.9");
       setShowForm(false);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -422,7 +427,6 @@ export function MonitorsPage() {
                 ))}
               </div>
             </div>
-
             <div>
               <label style={labelStyle}>URL</label>
               <input
@@ -435,7 +439,6 @@ export function MonitorsPage() {
                 required
               />
             </div>
-
             {monitorType === "tcp" && (
               <div>
                 <label style={labelStyle}>Porta</label>
@@ -449,7 +452,6 @@ export function MonitorsPage() {
                 />
               </div>
             )}
-
             {monitorType === "http" && (
               <div>
                 <label
@@ -522,6 +524,22 @@ export function MonitorsPage() {
                   style={inputStyle}
                   className="input-focus"
                   placeholder='"operational" ou "ok"'
+                />
+              </div>
+            )}
+            {user?.plan === "pro" && (
+              <div>
+                <label style={labelStyle}>Meta de SLA (%)</label>
+                <input
+                  type="number"
+                  value={slaTarget}
+                  onChange={(e) => setSlaTarget(e.target.value)}
+                  style={inputStyle}
+                  className="input-focus"
+                  placeholder="99.9"
+                  min="0"
+                  max="100"
+                  step="0.1"
                 />
               </div>
             )}
