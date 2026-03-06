@@ -59,7 +59,6 @@ export function UpgradeModal({ onClose }: UpgradeModalProps) {
           overflow: "hidden",
         }}
       >
-        {/* Top glow line */}
         <div
           style={{
             position: "absolute",
@@ -73,7 +72,6 @@ export function UpgradeModal({ onClose }: UpgradeModalProps) {
           }}
         />
 
-        {/* Icon */}
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <div
             style={{
@@ -117,7 +115,6 @@ export function UpgradeModal({ onClose }: UpgradeModalProps) {
           </p>
         </div>
 
-        {/* Pro card */}
         <div
           style={{
             background: "#060810",
@@ -203,7 +200,6 @@ export function UpgradeModal({ onClose }: UpgradeModalProps) {
           </ul>
         </div>
 
-        {/* Actions */}
         <div style={{ display: "flex", gap: "10px" }}>
           <button
             onClick={onClose}
