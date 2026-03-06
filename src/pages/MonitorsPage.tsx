@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Trash2, Plus, Clock, ExternalLink, RefreshCw } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Clock,
+  ExternalLink,
+  RefreshCw,
+  HelpCircle,
+} from "lucide-react";
 import {
   getMonitors,
   createMonitor,
@@ -22,8 +29,10 @@ export function MonitorsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [refreshed, setRefreshed] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showKeywordTip, setShowKeywordTip] = useState(false);
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
+  const [keyword, setKeyword] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -67,10 +76,15 @@ export function MonitorsPage() {
     setError("");
     setCreating(true);
     try {
-      const monitor = await createMonitor({ name, url });
+      const monitor = await createMonitor({
+        name,
+        url,
+        keyword: keyword || undefined,
+      });
       setMonitors((prev) => [...prev, monitor]);
       setName("");
       setUrl("");
+      setKeyword("");
       setShowForm(false);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -165,6 +179,37 @@ export function MonitorsPage() {
                 className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00D4AA] transition-colors"
                 placeholder="https://minha-api.com/health"
                 required
+              />
+            </div>
+            <div>
+              <label className="text-gray-400 text-sm mb-1 flex items-center gap-2">
+                Keyword{" "}
+                <span className="text-gray-600 text-xs">(opcional)</span>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onMouseEnter={() => setShowKeywordTip(true)}
+                    onMouseLeave={() => setShowKeywordTip(false)}
+                    className="text-gray-600 hover:text-gray-400 transition-colors"
+                  >
+                    <HelpCircle size={13} />
+                  </button>
+                  {showKeywordTip && (
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 bg-[#1f2937] border border-white/10 rounded-lg p-3 text-xs text-gray-400 leading-relaxed z-10 shadow-xl">
+                      Se preenchida, o UpStat verifica se esta palavra aparece
+                      na resposta do servidor. Se não aparecer, o monitor é
+                      marcado como offline — mesmo que o status HTTP seja 200.
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[#1f2937] border-r border-b border-white/10 rotate-45 -mt-1" />
+                    </div>
+                  )}
+                </div>
+              </label>
+              <input
+                type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00D4AA] transition-colors"
+                placeholder='ex: "operational" ou "ok"'
               />
             </div>
           </div>

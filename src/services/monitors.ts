@@ -14,6 +14,7 @@ export interface Monitor {
   } | null;
   ssl_days_remaining: number | null;
   ssl_valid_until: string | null;
+  keyword: string | null;
 }
 
 export async function getMonitors() {
@@ -21,9 +22,13 @@ export async function getMonitors() {
   return res.data.monitors;
 }
 
-export async function createMonitor(data: { name: string; url: string }) {
+export async function createMonitor(data: {
+  name: string;
+  url: string;
+  keyword?: string;
+}) {
   const res = await api.post("/monitors", data);
-  return res.data.monitor;
+  return res.data.monitor as Monitor;
 }
 
 export async function deleteMonitor(id: string) {
