@@ -480,6 +480,51 @@ export function SettingsPage() {
       </div>
 
       <div className="set-fade-4">
+        <Section title="Widget para seu site" icon={<Code size={14} />}>
+          <p
+            style={{
+              color: "#555",
+              fontSize: "12px",
+              marginBottom: "16px",
+              lineHeight: 1.6,
+            }}
+          >
+            Cole no seu site para mostrar o status em tempo real no canto da
+            tela.
+          </p>
+          <div
+            style={{
+              background: "#060810",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: "8px",
+              padding: "16px",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "10px",
+                color: "#555",
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+              }}
+            >
+              HTML
+            </p>
+            <code
+              style={{
+                color: "#00D4AA",
+                fontSize: "12px",
+                wordBreak: "break-all",
+              }}
+            >
+              {`<script src="https://upstat.online/widget.js" data-slug="${originalSlug}"></script>`}
+            </code>
+          </div>
+        </Section>
+      </div>
+
+      <div className="set-fade-5">
         <div
           style={{
             background: "#0D1117",
