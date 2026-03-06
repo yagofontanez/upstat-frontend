@@ -171,7 +171,7 @@ export function RegisterPage() {
                 status page em 2 minutos.
               </span>
             </div>
-            <p style={{ fontSize: "14px", color: "#555", lineHeight: 1.6 }}>
+            <p style={{ fontSize: "14px", color: "#bbbbbb", lineHeight: 1.6 }}>
               Sem cartão de crédito. Sem configuração complexa.
               <br />
               Só você e seus monitores.
@@ -242,7 +242,7 @@ export function RegisterPage() {
                   >
                     {step.label}
                   </div>
-                  <div style={{ fontSize: "13px", color: "#555" }}>
+                  <div style={{ fontSize: "13px", color: "#bbbbbb" }}>
                     {step.desc}
                   </div>
                 </div>
@@ -282,7 +282,7 @@ export function RegisterPage() {
               </span>
             </div>
             <div
-              style={{ fontSize: "13px", color: "#8B949E", lineHeight: 1.6 }}
+              style={{ fontSize: "13px", color: "#bbbbbb", lineHeight: 1.6 }}
             >
               3 monitores · alertas por email · status page pública
             </div>
@@ -335,7 +335,7 @@ export function RegisterPage() {
           >
             Comece de graça
           </h1>
-          <p style={{ color: "#555", fontSize: "13px", marginTop: "8px" }}>
+          <p style={{ color: "#bbbbbb", fontSize: "13px", marginTop: "8px" }}>
             Sem cartão · sem burocracia
           </p>
         </div>
@@ -439,7 +439,7 @@ export function RegisterPage() {
           style={{
             marginTop: "24px",
             fontSize: "11px",
-            color: "#333",
+            color: "#bbbbbb",
             textAlign: "center",
             lineHeight: 1.6,
           }}
@@ -454,7 +454,7 @@ export function RegisterPage() {
             borderTop: "1px solid rgba(255,255,255,0.05)",
             textAlign: "center",
             fontSize: "12px",
-            color: "#555",
+            color: "#bbbbbb",
           }}
         >
           Já tem conta?{" "}

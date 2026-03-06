@@ -75,6 +75,17 @@ export function BillingPage() {
           box-shadow: 0 0 0 3px rgba(0,212,170,0.08);
         }
         .input-cpf::placeholder { color: #555; }
+
+        .plans-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          max-width: 780px;
+        }
+
+        @media (max-width: 768px) {
+          .plans-grid { grid-template-columns: 1fr; }
+        }
       `}</style>
 
       <div className="bill-fade" style={{ marginBottom: "32px" }}>
@@ -89,7 +100,7 @@ export function BillingPage() {
         >
           Plano
         </h2>
-        <p style={{ color: "#555", fontSize: "12px", margin: 0 }}>
+        <p style={{ color: "#bbbbbb", fontSize: "12px", margin: 0 }}>
           Gerencie sua assinatura
         </p>
       </div>
@@ -111,7 +122,7 @@ export function BillingPage() {
           {isPro ? (
             <Zap size={16} color="#00D4AA" />
           ) : (
-            <Lock size={16} color="#555" />
+            <Lock size={16} color="#bbbbbb" />
           )}
           <div>
             <span
@@ -122,7 +133,7 @@ export function BillingPage() {
             <p
               style={{
                 fontSize: "11px",
-                color: isPro ? "#00D4AA" : "#555",
+                color: isPro ? "#00D4AA" : "#bbbbbb",
                 margin: "2px 0 0",
               }}
             >
@@ -140,7 +151,7 @@ export function BillingPage() {
             background: isPro
               ? "rgba(0,212,170,0.1)"
               : "rgba(255,255,255,0.06)",
-            color: isPro ? "#00D4AA" : "#555",
+            color: isPro ? "#00D4AA" : "#bbbbbb",
             border: `1px solid ${isPro ? "rgba(0,212,170,0.2)" : "rgba(255,255,255,0.08)"}`,
             fontWeight: 600,
           }}
@@ -149,15 +160,7 @@ export function BillingPage() {
         </span>
       </div>
 
-      <div
-        className="bill-fade-2"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "16px",
-          maxWidth: "780px",
-        }}
-      >
+      <div className="bill-fade-2 plans-grid">
         <div
           style={{
             background: "#0D1117",
@@ -219,7 +222,7 @@ export function BillingPage() {
             >
               R$0
             </span>
-            <span style={{ fontSize: "13px", color: "#555" }}>/mês</span>
+            <span style={{ fontSize: "13px", color: "#bbbbbb" }}>/mês</span>
           </div>
           <div
             style={{
@@ -244,7 +247,11 @@ export function BillingPage() {
                 key={item}
                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
-                <CheckCircle size={13} color="#333" style={{ flexShrink: 0 }} />
+                <CheckCircle
+                  size={13}
+                  color="#bbbbbb"
+                  style={{ flexShrink: 0 }}
+                />
                 <span style={{ fontSize: "12px", color: "#8B949E" }}>
                   {item}
                 </span>
@@ -331,7 +338,7 @@ export function BillingPage() {
             >
               R$29
             </span>
-            <span style={{ fontSize: "13px", color: "#555" }}>/mês</span>
+            <span style={{ fontSize: "13px", color: "#bbbbbb" }}>/mês</span>
           </div>
 
           <div
@@ -422,7 +429,7 @@ export function BillingPage() {
                   <p
                     style={{
                       fontSize: "10px",
-                      color: "#333",
+                      color: "#bbbbbb",
                       textAlign: "center",
                       margin: "10px 0 0",
                     }}

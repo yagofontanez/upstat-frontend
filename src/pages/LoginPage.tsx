@@ -267,7 +267,11 @@ export function LoginPage() {
                 }}
               />
               <span
-                style={{ marginLeft: "8px", fontSize: "11px", color: "#555" }}
+                style={{
+                  marginLeft: "8px",
+                  fontSize: "11px",
+                  color: "#bbbbbb",
+                }}
               >
                 upstat.online/dashboard
               </span>
@@ -362,7 +366,7 @@ export function LoginPage() {
                         gap: "12px",
                       }}
                     >
-                      <span style={{ fontSize: "11px", color: "#555" }}>
+                      <span style={{ fontSize: "11px", color: "#bbbbbb" }}>
                         {m.latency ? `${m.latency}ms` : "—"}
                       </span>
                       <span
@@ -422,7 +426,7 @@ export function LoginPage() {
                 <div
                   style={{
                     fontSize: "10px",
-                    color: "#555",
+                    color: "#bbbbbb",
                     marginTop: "2px",
                     letterSpacing: "0.5px",
                   }}
@@ -480,7 +484,7 @@ export function LoginPage() {
           >
             Bem-vindo de volta
           </h1>
-          <p style={{ color: "#555", fontSize: "13px", marginTop: "8px" }}>
+          <p style={{ color: "#bbbbbb", fontSize: "13px", marginTop: "8px" }}>
             Entre pra ver seus monitores
           </p>
         </div>
@@ -564,7 +568,7 @@ export function LoginPage() {
             borderTop: "1px solid rgba(255,255,255,0.05)",
             textAlign: "center",
             fontSize: "12px",
-            color: "#555",
+            color: "#bbbbbb",
           }}
         >
           Não tem conta?{" "}

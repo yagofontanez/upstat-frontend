@@ -59,7 +59,6 @@ function StatusBadge({ status }: { status: string }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        justifyContent: "center",
         gap: "5px",
         fontSize: "11px",
         padding: "3px 10px",
@@ -68,7 +67,9 @@ function StatusBadge({ status }: { status: string }) {
         border: `1px solid ${config.border}`,
         color: config.color,
         fontWeight: 600,
-        marginRight: 10,
+        whiteSpace: "nowrap",
+        justifyContent: "center",
+        marginRight: "10px",
       }}
     >
       <span
@@ -242,6 +243,24 @@ export function MonitorsPage() {
         .icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: color 0.15s, opacity 0.15s; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
         .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .input-focus:focus { border-color: #00D4AA !important; box-shadow: 0 0 0 3px rgba(0,212,170,0.08) !important; outline: none !important; }
+
+        .mon-table-header { display: grid; grid-template-columns: 1fr 110px 90px 90px 300px; align-items: center; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .mon-table-row { display: grid; grid-template-columns: 1fr 110px 90px 90px 300px; align-items: center; padding: 14px 20px; }
+        .mon-mobile-row { display: none; padding: 14px 20px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .mon-header-actions { display: flex; align-items: center; gap: 10px; }
+        .mon-header-refresh-label { display: inline; }
+
+        @media (max-width: 768px) {
+          .mon-table-header { display: none; }
+          .mon-table-row { display: none; }
+          .mon-mobile-row { display: block; }
+          .form-grid { grid-template-columns: 1fr; }
+          .mon-header-actions { gap: 8px; }
+          .mon-header-refresh-label { display: none; }
+        }
       `}</style>
 
       <div
@@ -270,7 +289,7 @@ export function MonitorsPage() {
             cadastrado{monitors.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div className="mon-header-actions">
           <button
             onClick={handleRefresh}
             disabled={refreshing}
@@ -295,7 +314,9 @@ export function MonitorsPage() {
                 animation: refreshing ? "spin 0.8s linear infinite" : "none",
               }}
             />
-            {refreshed ? "Atualizado!" : "Atualizar"}
+            <span className="mon-header-refresh-label">
+              {refreshed ? "Atualizado!" : "Atualizar"}
+            </span>
           </button>
           <button
             onClick={() => setShowForm(!showForm)}
@@ -312,11 +333,10 @@ export function MonitorsPage() {
               fontSize: "12px",
               fontWeight: 700,
               fontFamily: "'JetBrains Mono', monospace",
-              transition: "background 0.2s",
             }}
           >
             <Plus size={14} />
-            Novo monitor
+            <span>Novo monitor</span>
           </button>
         </div>
       </div>
@@ -377,14 +397,7 @@ export function MonitorsPage() {
             </div>
           )}
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "14px",
-              marginBottom: "14px",
-            }}
-          >
+          <div className="form-grid" style={{ marginBottom: "14px" }}>
             <div>
               <label style={labelStyle}>Nome</label>
               <input
@@ -592,21 +605,13 @@ export function MonitorsPage() {
         }}
       >
         {monitors.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 110px 90px 90px 300px",
-              alignItems: "center",
-              padding: "10px 20px",
-              borderBottom: "1px solid rgba(255,255,255,0.04)",
-            }}
-          >
+          <div className="mon-table-header">
             {["Monitor", "Status", "Latência", "Uptime", "Ações"].map((col) => (
               <span
                 key={col}
                 style={{
                   fontSize: "10px",
-                  color: "#333",
+                  color: "#555",
                   letterSpacing: "1.5px",
                   textTransform: "uppercase",
                 }}
@@ -653,223 +658,428 @@ export function MonitorsPage() {
             </button>
           </div>
         ) : (
-          monitors.map((monitor, i) => (
-            <div
-              key={monitor.id}
-              className="monitor-card"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 110px 90px 90px 300px",
-                alignItems: "center",
-                padding: "14px 20px",
-                borderBottom:
-                  i < monitors.length - 1
-                    ? "1px solid rgba(255,255,255,0.04)"
-                    : "none",
-                opacity: monitor.is_active ? 1 : 0.5,
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
-              >
+          monitors.map((monitor, i) => {
+            const borderBottom =
+              i < monitors.length - 1
+                ? "1px solid rgba(255,255,255,0.04)"
+                : "none";
+            const dotColor =
+              monitor.status === "up"
+                ? "#22C55E"
+                : monitor.status === "down"
+                  ? "#EF4444"
+                  : "#F59E0B";
+
+            return (
+              <div key={monitor.id}>
                 <div
-                  style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    flexShrink: 0,
-                    background:
-                      monitor.status === "up"
-                        ? "#22C55E"
-                        : monitor.status === "down"
-                          ? "#EF4444"
-                          : "#F59E0B",
-                  }}
-                />
-                <div>
-                  <p
+                  className="monitor-card mon-table-row"
+                  style={{ borderBottom, opacity: monitor.is_active ? 1 : 0.5 }}
+                >
+                  <div
                     style={{
-                      color: "#F0F6FC",
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      margin: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      minWidth: 0,
                     }}
                   >
-                    {monitor.name}
-                  </p>
+                    <div
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                        background: dotColor,
+                      }}
+                    />
+                    <div style={{ minWidth: 0 }}>
+                      <p
+                        style={{
+                          color: "#F0F6FC",
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          margin: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {monitor.name}
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          marginTop: "2px",
+                        }}
+                      >
+                        <p
+                          style={{
+                            color: "#555",
+                            fontSize: "11px",
+                            margin: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {monitor.url}
+                        </p>
+                        <a
+                          href={monitor.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            color: "#444",
+                            display: "flex",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <ExternalLink size={9} />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <StatusBadge status={monitor.status} />
+
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
                       gap: "4px",
-                      marginTop: "2px",
+                      color: "#555",
+                      fontSize: "12px",
                     }}
                   >
-                    <p style={{ color: "#333", fontSize: "11px", margin: 0 }}>
-                      {monitor.url}
-                    </p>
-                    <a
-                      href={monitor.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{ color: "#444", display: "flex" }}
+                    <Clock size={10} />
+                    {monitor.last_ping
+                      ? `${monitor.last_ping.latency_ms}ms`
+                      : "—"}
+                  </div>
+
+                  <div style={{ fontSize: "12px" }}>
+                    {monitor.uptime_7d ? (
+                      <span
+                        style={{
+                          color:
+                            parseFloat(monitor.uptime_7d) >= 99
+                              ? "#00D4AA"
+                              : parseFloat(monitor.uptime_7d) >= 95
+                                ? "#F59E0B"
+                                : "#EF4444",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {monitor.uptime_7d}%
+                      </span>
+                    ) : (
+                      <span style={{ color: "#333" }}>—</span>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <button
+                      className="icon-btn"
+                      onClick={() => handlePingNow(monitor.id)}
+                      disabled={pinging === monitor.id}
+                      style={{
+                        color: "#555",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: "6px",
+                        padding: "5px 10px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = "#00D4AA";
+                        e.currentTarget.style.borderColor =
+                          "rgba(0,212,170,0.2)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = "#555";
+                        e.currentTarget.style.borderColor =
+                          "rgba(255,255,255,0.06)";
+                      }}
                     >
-                      <ExternalLink size={9} />
-                    </a>
+                      <Zap size={11} />
+                      {pinging === monitor.id ? "..." : "Testar"}
+                    </button>
+                    <button
+                      className="icon-btn"
+                      onClick={() =>
+                        handleToggle(monitor.id, monitor.is_active)
+                      }
+                      style={{
+                        color: monitor.is_active ? "#555" : "#F59E0B",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: "6px",
+                        padding: "5px 10px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = monitor.is_active
+                          ? "#F59E0B"
+                          : "#22C55E";
+                        e.currentTarget.style.borderColor =
+                          "rgba(245,158,11,0.2)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = monitor.is_active
+                          ? "#555"
+                          : "#F59E0B";
+                        e.currentTarget.style.borderColor =
+                          "rgba(255,255,255,0.06)";
+                      }}
+                    >
+                      {monitor.is_active ? (
+                        <Pause size={11} />
+                      ) : (
+                        <Play size={11} />
+                      )}
+                      {monitor.is_active ? "Pausar" : "Reativar"}
+                    </button>
+                    <button
+                      className="icon-btn"
+                      onClick={() => navigate(`/monitors/${monitor.id}`)}
+                      style={{
+                        color: "#555",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: "6px",
+                        padding: "5px 10px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = "#F0F6FC";
+                        e.currentTarget.style.borderColor =
+                          "rgba(255,255,255,0.12)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = "#555";
+                        e.currentTarget.style.borderColor =
+                          "rgba(255,255,255,0.06)";
+                      }}
+                    >
+                      Detalhes
+                    </button>
+                    <div
+                      style={{
+                        width: "1px",
+                        height: "20px",
+                        background: "rgba(255,255,255,0.06)",
+                        margin: "0 2px",
+                      }}
+                    />
+                    <button
+                      className="icon-btn"
+                      onClick={() => handleDelete(monitor.id)}
+                      style={{
+                        color: "#333",
+                        background: "none",
+                        border: "1px solid transparent",
+                        borderRadius: "6px",
+                        padding: "5px 8px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = "#EF4444";
+                        e.currentTarget.style.borderColor =
+                          "rgba(239,68,68,0.2)";
+                        e.currentTarget.style.background =
+                          "rgba(239,68,68,0.06)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = "#333";
+                        e.currentTarget.style.borderColor = "transparent";
+                        e.currentTarget.style.background = "none";
+                      }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className="monitor-card mon-mobile-row"
+                  style={{ borderBottom, opacity: monitor.is_active ? 1 : 0.5 }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "12px",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        minWidth: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "8px",
+                          height: "8px",
+                          borderRadius: "50%",
+                          flexShrink: 0,
+                          background: dotColor,
+                        }}
+                      />
+                      <div style={{ minWidth: 0 }}>
+                        <p
+                          style={{
+                            color: "#F0F6FC",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            margin: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {monitor.name}
+                        </p>
+                        <p
+                          style={{
+                            color: "#555",
+                            fontSize: "11px",
+                            margin: "2px 0 0",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {monitor.url}
+                        </p>
+                      </div>
+                    </div>
+                    <StatusBadge status={monitor.status} />
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      paddingLeft: "18px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {monitor.last_ping && (
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "#555",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "3px",
+                        }}
+                      >
+                        <Clock size={10} />
+                        {monitor.last_ping.latency_ms}ms
+                      </span>
+                    )}
+                    {monitor.uptime_7d && (
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color:
+                            parseFloat(monitor.uptime_7d) >= 99
+                              ? "#00D4AA"
+                              : parseFloat(monitor.uptime_7d) >= 95
+                                ? "#F59E0B"
+                                : "#EF4444",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {monitor.uptime_7d}%
+                      </span>
+                    )}
+                    <div
+                      style={{
+                        marginLeft: "auto",
+                        display: "flex",
+                        gap: "6px",
+                      }}
+                    >
+                      <button
+                        className="icon-btn"
+                        onClick={() => handlePingNow(monitor.id)}
+                        disabled={pinging === monitor.id}
+                        style={{
+                          color: "#555",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.06)",
+                          borderRadius: "6px",
+                          padding: "5px 10px",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = "#00D4AA";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = "#555";
+                        }}
+                      >
+                        <Zap size={11} />
+                        {pinging === monitor.id ? "..." : "Testar"}
+                      </button>
+                      <button
+                        className="icon-btn"
+                        onClick={() => navigate(`/monitors/${monitor.id}`)}
+                        style={{
+                          color: "#555",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.06)",
+                          borderRadius: "6px",
+                          padding: "5px 10px",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = "#F0F6FC";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = "#555";
+                        }}
+                      >
+                        Detalhes
+                      </button>
+                      <button
+                        className="icon-btn"
+                        onClick={() => handleDelete(monitor.id)}
+                        style={{
+                          color: "#333",
+                          background: "none",
+                          border: "1px solid transparent",
+                          borderRadius: "6px",
+                          padding: "5px 8px",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = "#EF4444";
+                          e.currentTarget.style.background =
+                            "rgba(239,68,68,0.06)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = "#333";
+                          e.currentTarget.style.background = "none";
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <StatusBadge status={monitor.status} />
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  color: "#555",
-                  fontSize: "12px",
-                }}
-              >
-                <Clock size={10} />
-                {monitor.last_ping ? `${monitor.last_ping.latency_ms}ms` : "—"}
-              </div>
-
-              <div style={{ fontSize: "12px" }}>
-                {monitor.uptime_7d ? (
-                  <span
-                    style={{
-                      color:
-                        parseFloat(monitor.uptime_7d) >= 99
-                          ? "#00D4AA"
-                          : parseFloat(monitor.uptime_7d) >= 95
-                            ? "#F59E0B"
-                            : "#EF4444",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {monitor.uptime_7d}%
-                  </span>
-                ) : (
-                  <span style={{ color: "#333" }}>—</span>
-                )}
-              </div>
-
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "6px" }}
-              >
-                <button
-                  className="icon-btn"
-                  onClick={() => handlePingNow(monitor.id)}
-                  disabled={pinging === monitor.id}
-                  style={{
-                    color: "#555",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: "6px",
-                    padding: "5px 10px",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = "#00D4AA";
-                    e.currentTarget.style.borderColor = "rgba(0,212,170,0.2)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = "#555";
-                    e.currentTarget.style.borderColor =
-                      "rgba(255,255,255,0.06)";
-                  }}
-                >
-                  <Zap size={11} />
-                  {pinging === monitor.id ? "..." : "Testar"}
-                </button>
-
-                <button
-                  className="icon-btn"
-                  onClick={() => handleToggle(monitor.id, monitor.is_active)}
-                  style={{
-                    color: monitor.is_active ? "#555" : "#F59E0B",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: "6px",
-                    padding: "5px 10px",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = monitor.is_active
-                      ? "#F59E0B"
-                      : "#22C55E";
-                    e.currentTarget.style.borderColor = "rgba(245,158,11,0.2)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = monitor.is_active
-                      ? "#555"
-                      : "#F59E0B";
-                    e.currentTarget.style.borderColor =
-                      "rgba(255,255,255,0.06)";
-                  }}
-                >
-                  {monitor.is_active ? <Pause size={11} /> : <Play size={11} />}
-                  {monitor.is_active ? "Pausar" : "Reativar"}
-                </button>
-
-                <button
-                  className="icon-btn"
-                  onClick={() => navigate(`/monitors/${monitor.id}`)}
-                  style={{
-                    color: "#555",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: "6px",
-                    padding: "5px 10px",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = "#F0F6FC";
-                    e.currentTarget.style.borderColor =
-                      "rgba(255,255,255,0.12)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = "#555";
-                    e.currentTarget.style.borderColor =
-                      "rgba(255,255,255,0.06)";
-                  }}
-                >
-                  Detalhes
-                </button>
-
-                <div
-                  style={{
-                    width: "1px",
-                    height: "20px",
-                    background: "rgba(255,255,255,0.06)",
-                    margin: "0 2px",
-                  }}
-                />
-
-                <button
-                  className="icon-btn"
-                  onClick={() => handleDelete(monitor.id)}
-                  style={{
-                    color: "#333",
-                    background: "none",
-                    border: "1px solid transparent",
-                    borderRadius: "6px",
-                    padding: "5px 8px",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = "#EF4444";
-                    e.currentTarget.style.borderColor = "rgba(239,68,68,0.2)";
-                    e.currentTarget.style.background = "rgba(239,68,68,0.06)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = "#333";
-                    e.currentTarget.style.borderColor = "transparent";
-                    e.currentTarget.style.background = "none";
-                  }}
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

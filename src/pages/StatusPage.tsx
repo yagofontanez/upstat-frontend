@@ -355,7 +355,7 @@ export function StatusPage() {
               alignItems: "center",
               gap: "6px",
               fontSize: "11px",
-              color: "#555",
+              color: "#bbbbbb",
             }}
           >
             <div
@@ -469,7 +469,7 @@ export function StatusPage() {
                           display: "flex",
                           alignItems: "center",
                           gap: "4px",
-                          color: "#555",
+                          color: "#bbbbbb",
                           fontSize: "11px",
                         }}
                       >
@@ -478,7 +478,7 @@ export function StatusPage() {
                       </div>
                     )}
                     {monitor.uptime_percent && (
-                      <span style={{ fontSize: "11px", color: "#555" }}>
+                      <span style={{ fontSize: "11px", color: "#bbbbbb" }}>
                         {monitor.uptime_percent}%
                       </span>
                     )}
@@ -563,7 +563,7 @@ export function StatusPage() {
               >
                 🎉
               </div>
-              <p style={{ color: "#555", fontSize: "13px", margin: 0 }}>
+              <p style={{ color: "#bbbbbb", fontSize: "13px", margin: 0 }}>
                 Nenhum incidente registrado.
               </p>
             </div>
@@ -623,7 +623,7 @@ export function StatusPage() {
                     </span>
                     <p
                       style={{
-                        color: "#555",
+                        color: "#bbbbbb",
                         fontSize: "11px",
                         margin: "2px 0 0",
                       }}
@@ -661,7 +661,9 @@ export function StatusPage() {
             rel="noreferrer"
             style={{ textDecoration: "none" }}
           >
-            <span style={{ fontSize: "12px", color: "#333" }}>Powered by </span>
+            <span style={{ fontSize: "12px", color: "#bbbbbb" }}>
+              Powered by{" "}
+            </span>
             <span
               style={{ fontSize: "12px", color: "#00D4AA", fontWeight: 600 }}
             >

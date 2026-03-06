@@ -282,7 +282,7 @@ export function SettingsPage() {
         >
           Configurações
         </h2>
-        <p style={{ color: "#555", fontSize: "12px", margin: 0 }}>
+        <p style={{ color: "#bbbbbb", fontSize: "12px", margin: 0 }}>
           Gerencie sua conta e notificações
         </p>
       </div>
@@ -303,7 +303,11 @@ export function SettingsPage() {
                 type="text"
                 value={user?.name}
                 disabled
-                style={{ ...inputStyle, color: "#555", cursor: "not-allowed" }}
+                style={{
+                  ...inputStyle,
+                  color: "#bbbbbb",
+                  cursor: "not-allowed",
+                }}
               />
             </div>
             <div>
@@ -312,7 +316,11 @@ export function SettingsPage() {
                 type="email"
                 value={user?.email}
                 disabled
-                style={{ ...inputStyle, color: "#555", cursor: "not-allowed" }}
+                style={{
+                  ...inputStyle,
+                  color: "#bbbbbb",
+                  cursor: "not-allowed",
+                }}
               />
             </div>
           </div>
@@ -327,14 +335,14 @@ export function SettingsPage() {
                   user?.plan === "pro"
                     ? "rgba(0,212,170,0.08)"
                     : "rgba(255,255,255,0.04)",
-                color: user?.plan === "pro" ? "#00D4AA" : "#555",
+                color: user?.plan === "pro" ? "#00D4AA" : "#bbbbbb",
                 border: `1px solid ${user?.plan === "pro" ? "rgba(0,212,170,0.15)" : "rgba(255,255,255,0.08)"}`,
               }}
             >
               {user?.plan === "pro" ? "⚡ Pro" : "Free"}
             </span>
             {user?.plan === "free" && (
-              <span style={{ fontSize: "11px", color: "#555" }}>
+              <span style={{ fontSize: "11px", color: "#bbbbbb" }}>
                 Faça upgrade para desbloquear mais recursos.
               </span>
             )}
@@ -392,7 +400,7 @@ export function SettingsPage() {
                 >
                   {item.label}
                 </p>
-                <p style={{ color: "#555", fontSize: "11px", margin: 0 }}>
+                <p style={{ color: "#bbbbbb", fontSize: "11px", margin: 0 }}>
                   {item.desc}
                 </p>
               </div>
@@ -434,7 +442,7 @@ export function SettingsPage() {
         <Section title="Slack" icon={<Bell size={14} />}>
           <p
             style={{
-              color: "#555",
+              color: "#bbbbbb",
               fontSize: "12px",
               marginBottom: "16px",
               lineHeight: 1.6,
@@ -482,7 +490,7 @@ export function SettingsPage() {
               >
                 Ativar notificações
               </p>
-              <p style={{ color: "#555", fontSize: "11px", margin: 0 }}>
+              <p style={{ color: "#bbbbbb", fontSize: "11px", margin: 0 }}>
                 Enviar alerta quando monitor cair ou recuperar
               </p>
             </div>
@@ -513,7 +521,7 @@ export function SettingsPage() {
         <Section title="Badge para README" icon={<Code size={14} />}>
           <p
             style={{
-              color: "#555",
+              color: "#bbbbbb",
               fontSize: "12px",
               marginBottom: "16px",
               lineHeight: 1.6,
@@ -534,7 +542,7 @@ export function SettingsPage() {
             <p
               style={{
                 fontSize: "10px",
-                color: "#555",
+                color: "#bbbbbb",
                 letterSpacing: "1px",
                 textTransform: "uppercase",
                 marginBottom: "10px",
@@ -558,7 +566,7 @@ export function SettingsPage() {
             <p
               style={{
                 fontSize: "10px",
-                color: "#555",
+                color: "#bbbbbb",
                 letterSpacing: "1px",
                 textTransform: "uppercase",
                 marginBottom: "10px",
@@ -583,7 +591,7 @@ export function SettingsPage() {
         <Section title="Widget para seu site" icon={<Code size={14} />}>
           <p
             style={{
-              color: "#555",
+              color: "#bbbbbb",
               fontSize: "12px",
               marginBottom: "16px",
               lineHeight: 1.6,
@@ -603,7 +611,7 @@ export function SettingsPage() {
             <p
               style={{
                 fontSize: "10px",
-                color: "#555",
+                color: "#bbbbbb",
                 letterSpacing: "1px",
                 textTransform: "uppercase",
                 marginBottom: "10px",
@@ -644,7 +652,7 @@ export function SettingsPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Globe size={14} color="#555" />
+              <Globe size={14} color="#bbbbbb" />
               <span
                 style={{ fontSize: "13px", fontWeight: 600, color: "#F0F6FC" }}
               >
@@ -742,7 +750,7 @@ export function SettingsPage() {
                 >
                   <span
                     style={{
-                      color: "#555",
+                      color: "#bbbbbb",
                       fontSize: "12px",
                       whiteSpace: "nowrap",
                     }}
@@ -759,7 +767,7 @@ export function SettingsPage() {
                       background: "none",
                       border: "none",
                       outline: "none",
-                      color: user?.plan !== "pro" ? "#555" : "#F0F6FC",
+                      color: user?.plan !== "pro" ? "#bbbbbb" : "#F0F6FC",
                       fontSize: "13px",
                       fontFamily: "'JetBrains Mono', monospace",
                       cursor: user?.plan !== "pro" ? "not-allowed" : "text",
@@ -787,7 +795,7 @@ export function SettingsPage() {
                 Monitores exibidos
               </label>
               {monitors.length === 0 ? (
-                <p style={{ color: "#555", fontSize: "12px" }}>
+                <p style={{ color: "#bbbbbb", fontSize: "12px" }}>
                   Nenhum monitor cadastrado ainda.
                 </p>
               ) : (

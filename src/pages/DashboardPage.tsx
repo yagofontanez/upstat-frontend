@@ -50,20 +50,30 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span
       style={{
-        fontSize: "8px",
+        fontSize: "11px",
         padding: "3px 10px",
         borderRadius: "100px",
         background: config.bg,
         border: `1px solid ${config.border}`,
         color: config.color,
         fontWeight: 600,
-        letterSpacing: "0.3px",
-        marginRight: "25px",
         display: "inline-flex",
         alignItems: "center",
+        gap: "5px",
+        whiteSpace: "nowrap",
+        marginRight: 15,
         justifyContent: "center",
       }}
     >
+      <span
+        style={{
+          width: "5px",
+          height: "5px",
+          borderRadius: "50%",
+          background: config.color,
+          flexShrink: 0,
+        }}
+      />
       {config.label}
     </span>
   );
@@ -71,9 +81,6 @@ function StatusBadge({ status }: { status: string }) {
 
 export function DashboardPage() {
   const { user, refreshUser } = useAuth();
-
-  console.log(user, "user");
-
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -86,13 +93,11 @@ export function DashboardPage() {
         setShowOnboarding(true);
       });
     }
-
     function fetchData() {
       getMonitors()
         .then(setMonitors)
         .finally(() => setLoading(false));
     }
-
     fetchData();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
@@ -142,29 +147,33 @@ export function DashboardPage() {
       )}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse-live {
-          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,212,170,0.4); }
-          50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(0,212,170,0); }
-        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes pulse-live { 0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(0,212,170,0.4); } 50% { opacity:0.7; box-shadow:0 0 0 4px rgba(0,212,170,0); } }
         .dash-fade { animation: fadeUp 0.4s ease both; }
         .dash-fade-1 { animation: fadeUp 0.4s 0.05s ease both; }
         .dash-fade-2 { animation: fadeUp 0.4s 0.1s ease both; }
         .dash-fade-3 { animation: fadeUp 0.4s 0.15s ease both; }
         .monitor-row:hover { background: rgba(255,255,255,0.02) !important; }
         .monitor-row { transition: background 0.15s; }
+
+        .monitor-desktop { display: grid; grid-template-columns: 1fr 100px 80px 90px; align-items: center; padding: 14px 20px; cursor: pointer; }
+        .monitor-mobile { display: none; padding: 14px 20px; cursor: pointer; }
+        .monitor-col-header { display: grid; grid-template-columns: 1fr 100px 80px 90px; padding: 8px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+
+        @media (max-width: 768px) {
+          .monitor-desktop { display: none; }
+          .monitor-mobile { display: block; }
+          .monitor-col-header { display: none; }
+        }
       `}</style>
 
-      <div className="dash-fade" style={{ marginBottom: "32px" }}>
+      <div className="dash-fade" style={{ marginBottom: "28px" }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "12px",
-            marginBottom: "6px",
+            marginBottom: "4px",
           }}
         >
           <h2
@@ -203,7 +212,7 @@ export function DashboardPage() {
             ao vivo
           </div>
         </div>
-        <p style={{ color: "#555", fontSize: "12px", margin: 0 }}>
+        <p style={{ color: "#bbbbbb", fontSize: "12px", margin: 0 }}>
           Atualiza automaticamente a cada 60 segundos
         </p>
       </div>
@@ -215,8 +224,8 @@ export function DashboardPage() {
             background: allUp ? "rgba(0,212,170,0.04)" : "rgba(239,68,68,0.04)",
             border: `1px solid ${allUp ? "rgba(0,212,170,0.15)" : "rgba(239,68,68,0.15)"}`,
             borderRadius: "12px",
-            padding: "16px 20px",
-            marginBottom: "24px",
+            padding: "14px 20px",
+            marginBottom: "20px",
             display: "flex",
             alignItems: "center",
             gap: "12px",
@@ -252,7 +261,7 @@ export function DashboardPage() {
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: "12px",
-          marginBottom: "24px",
+          marginBottom: "20px",
         }}
       >
         {[
@@ -281,7 +290,7 @@ export function DashboardPage() {
               background: "#0D1117",
               border: "1px solid rgba(255,255,255,0.06)",
               borderRadius: "12px",
-              padding: "20px",
+              padding: "16px 20px",
             }}
           >
             <div
@@ -289,14 +298,14 @@ export function DashboardPage() {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                marginBottom: "12px",
+                marginBottom: "10px",
               }}
             >
               {card.icon}
               <span
                 style={{
-                  fontSize: "11px",
-                  color: "#555",
+                  fontSize: "10px",
+                  color: "#bbbbbb",
                   letterSpacing: "1px",
                   textTransform: "uppercase",
                 }}
@@ -307,7 +316,7 @@ export function DashboardPage() {
             <p
               style={{
                 color: card.color,
-                fontSize: "36px",
+                fontSize: "32px",
                 fontWeight: 700,
                 margin: 0,
                 letterSpacing: "-1px",
@@ -333,7 +342,7 @@ export function DashboardPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "16px 20px",
+            padding: "14px 20px",
             borderBottom: "1px solid rgba(255,255,255,0.06)",
           }}
         >
@@ -357,20 +366,13 @@ export function DashboardPage() {
         </div>
 
         {monitors.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 100px 80px 90px",
-              padding: "8px 20px",
-              borderBottom: "1px solid rgba(255,255,255,0.04)",
-            }}
-          >
+          <div className="monitor-col-header">
             {["Monitor", "Status", "Latência", "Uptime 7d"].map((col) => (
               <span
                 key={col}
                 style={{
                   fontSize: "10px",
-                  color: "#333",
+                  color: "#bbbbbb",
                   letterSpacing: "1.5px",
                   textTransform: "uppercase",
                 }}
@@ -398,7 +400,9 @@ export function DashboardPage() {
             >
               <Activity size={20} color="#00D4AA" />
             </div>
-            <p style={{ color: "#555", fontSize: "13px", margin: "0 0 12px" }}>
+            <p
+              style={{ color: "#bbbbbb", fontSize: "13px", margin: "0 0 12px" }}
+            >
               Nenhum monitor ainda.
             </p>
             <Link
@@ -414,94 +418,217 @@ export function DashboardPage() {
             </Link>
           </div>
         ) : (
-          monitors.map((monitor, i) => (
-            <Link
-              key={monitor.id}
-              to={`/monitors/${monitor.id}`}
-              style={{ textDecoration: "none" }}
-            >
-              <div
-                className="monitor-row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 100px 80px 90px",
-                  alignItems: "center",
-                  padding: "14px 20px",
-                  borderBottom:
-                    i < monitors.length - 1
-                      ? "1px solid rgba(255,255,255,0.04)"
-                      : "none",
-                  cursor: "pointer",
-                }}
-              >
+          monitors.map((monitor, i) => {
+            const borderBottom =
+              i < monitors.length - 1
+                ? "1px solid rgba(255,255,255,0.04)"
+                : "none";
+            return (
+              <div key={monitor.id}>
+                <Link
+                  to={`/monitors/${monitor.id}`}
+                  style={{ textDecoration: "none" }}
+                >
+                  <div
+                    className="monitor-row monitor-desktop"
+                    style={{ borderBottom }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        minWidth: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "8px",
+                          height: "8px",
+                          borderRadius: "50%",
+                          flexShrink: 0,
+                          background:
+                            monitor.status === "up"
+                              ? "#22C55E"
+                              : monitor.status === "down"
+                                ? "#EF4444"
+                                : "#F59E0B",
+                          animation:
+                            monitor.status === "down"
+                              ? "pulse-live 1.5s infinite"
+                              : "none",
+                        }}
+                      />
+                      <div style={{ minWidth: 0 }}>
+                        <p
+                          style={{
+                            color: "#F0F6FC",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            margin: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {monitor.name}
+                        </p>
+                        <p
+                          style={{
+                            color: "#8f8f8f",
+                            fontSize: "11px",
+                            margin: "2px 0 0",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {monitor.url}
+                        </p>
+                      </div>
+                    </div>
+                    <StatusBadge status={monitor.status} />
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <Clock size={10} color="#555" />
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: monitor.last_ping ? "#8B949E" : "#333",
+                        }}
+                      >
+                        {monitor.last_ping
+                          ? `${monitor.last_ping.latency_ms}ms`
+                          : "—"}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "12px" }}>
+                      <UptimeIndicator uptime={monitor.uptime_7d} />
+                    </div>
+                  </div>
+                </Link>
+
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                  className="monitor-row monitor-mobile"
+                  style={{ borderBottom }}
                 >
                   <div
                     style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      flexShrink: 0,
-                      background:
-                        monitor.status === "up"
-                          ? "#22C55E"
-                          : monitor.status === "down"
-                            ? "#EF4444"
-                            : "#F59E0B",
-                      animation:
-                        monitor.status === "down"
-                          ? "pulse-live 1.5s infinite"
-                          : "none",
-                    }}
-                  />
-                  <div>
-                    <p
-                      style={{
-                        color: "#F0F6FC",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        margin: 0,
-                      }}
-                    >
-                      {monitor.name}
-                    </p>
-                    <p
-                      style={{
-                        color: "#333",
-                        fontSize: "11px",
-                        margin: "2px 0 0",
-                      }}
-                    >
-                      {monitor.url}
-                    </p>
-                  </div>
-                </div>
-
-                <StatusBadge status={monitor.status} />
-
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                >
-                  <Clock size={10} color="#555" />
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      color: monitor.last_ping ? "#8B949E" : "#333",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "12px",
+                      marginBottom: "10px",
                     }}
                   >
-                    {monitor.last_ping
-                      ? `${monitor.last_ping.latency_ms}ms`
-                      : "—"}
-                  </span>
-                </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        minWidth: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "8px",
+                          height: "8px",
+                          borderRadius: "50%",
+                          flexShrink: 0,
+                          background:
+                            monitor.status === "up"
+                              ? "#22C55E"
+                              : monitor.status === "down"
+                                ? "#EF4444"
+                                : "#F59E0B",
+                          animation:
+                            monitor.status === "down"
+                              ? "pulse-live 1.5s infinite"
+                              : "none",
+                        }}
+                      />
+                      <div style={{ minWidth: 0 }}>
+                        <p
+                          style={{
+                            color: "#F0F6FC",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            margin: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {monitor.name}
+                        </p>
+                        <p
+                          style={{
+                            color: "#333",
+                            fontSize: "11px",
+                            margin: "2px 0 0",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {monitor.url}
+                        </p>
+                      </div>
+                    </div>
+                    <StatusBadge status={monitor.status} />
+                  </div>
 
-                <div style={{ fontSize: "12px" }}>
-                  <UptimeIndicator uptime={monitor.uptime_7d} />
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      paddingLeft: "18px",
+                    }}
+                  >
+                    {monitor.last_ping && (
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "#555",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <Clock size={10} color="#555" />
+                        {monitor.last_ping.latency_ms}ms
+                      </span>
+                    )}
+                    {monitor.uptime_7d && (
+                      <span style={{ fontSize: "11px", color: "#555" }}>
+                        uptime <UptimeIndicator uptime={monitor.uptime_7d} />
+                      </span>
+                    )}
+                    <Link
+                      to={`/monitors/${monitor.id}`}
+                      style={{
+                        marginLeft: "auto",
+                        fontSize: "11px",
+                        color: "#00D4AA",
+                        textDecoration: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      Ver detalhes <ExternalLink size={10} />
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </Link>
-          ))
+            );
+          })
         )}
       </div>
     </div>

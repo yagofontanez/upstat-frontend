@@ -190,7 +190,7 @@ export function MonitorDetailPage() {
       icon: <Activity size={12} color="#555" />,
     },
     {
-      label: "Latência média",
+      label: "Latência",
       value: avgLatency ? `${avgLatency}ms` : "—",
       color: "#F0F6FC",
       icon: <Clock size={12} color="#555" />,
@@ -244,6 +244,26 @@ export function MonitorDetailPage() {
         .incident-row { transition: background 0.15s; }
         .back-btn:hover { color: #F0F6FC !important; }
         .export-btn:hover { background: rgba(255,255,255,0.08) !important; color: #F0F6FC !important; }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+
+        .det-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+        .det-header-info { display: flex; align-items: center; gap: 14px; }
+        .det-url { color: #555; font-size: 12px; text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 400px; }
+
+        .incident-inner { display: flex; align-items: center; justify-content: space-between; }
+
+        @media (max-width: 768px) {
+          .stat-grid { grid-template-columns: repeat(3, 1fr); }
+          .det-header { flex-direction: column; align-items: flex-start; }
+          .det-url { max-width: 220px; }
+          .incident-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
+        }
+
+        @media (max-width: 480px) {
+          .stat-grid { grid-template-columns: repeat(2, 1fr); }
+          .det-url { max-width: 160px; }
+        }
       `}</style>
 
       <button
@@ -268,16 +288,8 @@ export function MonitorDetailPage() {
         Voltar
       </button>
 
-      <div
-        className="det-fade"
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          marginBottom: "28px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+      <div className="det-fade det-header" style={{ marginBottom: "24px" }}>
+        <div className="det-header-info">
           <div
             style={{
               width: "44px",
@@ -304,7 +316,7 @@ export function MonitorDetailPage() {
               }}
             />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <h2
               style={{
                 color: "#F0F6FC",
@@ -320,11 +332,7 @@ export function MonitorDetailPage() {
               href={monitor.url}
               target="_blank"
               rel="noreferrer"
-              style={{
-                color: "#555",
-                fontSize: "12px",
-                textDecoration: "none",
-              }}
+              className="det-url"
             >
               {monitor.url} ↗
             </a>
@@ -344,10 +352,11 @@ export function MonitorDetailPage() {
               borderRadius: "8px",
               padding: "8px 14px",
               cursor: "pointer",
-              color: "#8B949E",
+              color: "#555",
               fontSize: "12px",
               fontFamily: "'JetBrains Mono', monospace",
               transition: "all 0.15s",
+              flexShrink: 0,
             }}
           >
             <Download size={13} />
@@ -368,6 +377,7 @@ export function MonitorDetailPage() {
               color: "#00D4AA",
               fontSize: "12px",
               fontFamily: "'JetBrains Mono', monospace",
+              flexShrink: 0,
             }}
           >
             <Download size={13} />
@@ -388,15 +398,7 @@ export function MonitorDetailPage() {
         )}
       </div>
 
-      <div
-        className="det-fade-1"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gap: "10px",
-          marginBottom: "20px",
-        }}
-      >
+      <div className="det-fade-1 stat-grid" style={{ marginBottom: "20px" }}>
         {statCards.map((card) => (
           <div
             key={card.label}
@@ -458,6 +460,8 @@ export function MonitorDetailPage() {
             alignItems: "center",
             justifyContent: "space-between",
             marginBottom: "16px",
+            flexWrap: "wrap",
+            gap: "10px",
           }}
         >
           <span style={{ fontSize: "13px", fontWeight: 600, color: "#F0F6FC" }}>
@@ -472,39 +476,26 @@ export function MonitorDetailPage() {
               color: "#555",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            {[
+              ["rgba(34,197,94,0.2)", "100%"],
+              ["rgba(245,158,11,0.2)", ">90%"],
+              ["rgba(239,68,68,0.2)", "<90%"],
+            ].map(([bg, label]) => (
               <div
-                style={{
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "3px",
-                  background: "rgba(34,197,94,0.2)",
-                }}
-              />{" "}
-              100%
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <div
-                style={{
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "3px",
-                  background: "rgba(245,158,11,0.2)",
-                }}
-              />{" "}
-              &gt;90%
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <div
-                style={{
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "3px",
-                  background: "rgba(239,68,68,0.2)",
-                }}
-              />{" "}
-              &lt;90%
-            </div>
+                key={label}
+                style={{ display: "flex", alignItems: "center", gap: "4px" }}
+              >
+                <div
+                  style={{
+                    width: "10px",
+                    height: "10px",
+                    borderRadius: "3px",
+                    background: bg,
+                  }}
+                />
+                {label}
+              </div>
+            ))}
           </div>
         </div>
         {heatmap.length === 0 ? (
@@ -600,7 +591,7 @@ export function MonitorDetailPage() {
             <div style={{ textAlign: "center" }}>
               <Activity
                 size={20}
-                color="#333"
+                color="#555"
                 style={{ margin: "0 auto 8px" }}
               />
               <p style={{ color: "#555", fontSize: "12px", margin: 0 }}>
@@ -719,9 +710,6 @@ export function MonitorDetailPage() {
               key={incident.id}
               className="incident-row"
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
                 padding: "14px 20px",
                 borderBottom:
                   i < incidents.length - 1
@@ -729,68 +717,73 @@ export function MonitorDetailPage() {
                     : "none",
               }}
             >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "12px" }}
-              >
+              <div className="incident-inner">
                 <div
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    flexShrink: 0,
-                    background: incident.resolved_at
-                      ? "rgba(34,197,94,0.08)"
-                      : "rgba(239,68,68,0.08)",
-                    border: `1px solid ${incident.resolved_at ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)"}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
                 >
                   <div
                     style={{
-                      width: "7px",
-                      height: "7px",
-                      borderRadius: "50%",
-                      background: incident.resolved_at ? "#22C55E" : "#EF4444",
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "8px",
+                      flexShrink: 0,
+                      background: incident.resolved_at
+                        ? "rgba(34,197,94,0.08)"
+                        : "rgba(239,68,68,0.08)",
+                      border: `1px solid ${incident.resolved_at ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)"}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
-                  />
+                  >
+                    <div
+                      style={{
+                        width: "7px",
+                        height: "7px",
+                        borderRadius: "50%",
+                        background: incident.resolved_at
+                          ? "#22C55E"
+                          : "#EF4444",
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        color: "#F0F6FC",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {incident.resolved_at ? "Resolvido" : "Em andamento"}
+                    </span>
+                    <p
+                      style={{
+                        color: "#555",
+                        fontSize: "11px",
+                        margin: "2px 0 0",
+                      }}
+                    >
+                      Iniciou {timeAgo(incident.started_at)}
+                    </p>
+                  </div>
                 </div>
-                <div>
+                {incident.duration_ms && (
                   <span
                     style={{
-                      fontSize: "13px",
-                      color: "#F0F6FC",
-                      fontWeight: 600,
+                      fontSize: "12px",
+                      color: "#8B949E",
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      padding: "4px 10px",
+                      borderRadius: "6px",
+                      flexShrink: 0,
                     }}
                   >
-                    {incident.resolved_at ? "Resolvido" : "Em andamento"}
+                    {formatDuration(incident.duration_ms)}
                   </span>
-                  <p
-                    style={{
-                      color: "#555",
-                      fontSize: "11px",
-                      margin: "2px 0 0",
-                    }}
-                  >
-                    Iniciou {timeAgo(incident.started_at)}
-                  </p>
-                </div>
+                )}
               </div>
-              {incident.duration_ms && (
-                <span
-                  style={{
-                    fontSize: "12px",
-                    color: "#8B949E",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    padding: "4px 10px",
-                    borderRadius: "6px",
-                  }}
-                >
-                  {formatDuration(incident.duration_ms)}
-                </span>
-              )}
             </div>
           ))
         )}

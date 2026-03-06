@@ -101,7 +101,7 @@ export function Sidebar() {
                 textDecoration: "none",
                 fontSize: "13px",
                 background: active ? "rgba(0,212,170,0.08)" : "transparent",
-                color: active ? "#00D4AA" : "#555",
+                color: active ? "#00D4AA" : "#bbbbbb",
                 fontWeight: active ? 600 : 400,
                 borderLeft: active
                   ? "2px solid #00D4AA"
@@ -167,7 +167,7 @@ export function Sidebar() {
               style={{
                 fontSize: "10px",
                 margin: "1px 0 0",
-                color: user?.plan === "pro" ? "#00D4AA" : "#555",
+                color: user?.plan === "pro" ? "#00D4AA" : "#bbbbbb",
                 fontWeight: user?.plan === "pro" ? 600 : 400,
               }}
             >
@@ -186,7 +186,7 @@ export function Sidebar() {
             padding: "9px 12px",
             borderRadius: "8px",
             fontSize: "13px",
-            color: "#444",
+            color: "#bbbbbb",
             background: "none",
             border: "none",
             cursor: "pointer",
