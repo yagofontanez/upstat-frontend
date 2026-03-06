@@ -3,6 +3,11 @@ import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
 import { getMyPage, updatePage } from "../services/pages";
 import { ExternalLink } from "lucide-react";
+import {
+  subscribePush,
+  unsubscribePush,
+  isPushSubscribed,
+} from "../services/push";
 
 export function SettingsPage() {
   const { user } = useAuth();
@@ -16,6 +21,8 @@ export function SettingsPage() {
   const [originalSlug, setOriginalSlug] = useState("");
   const [savingPage, setSavingPage] = useState(false);
   const [pageSuccess, setPageSuccess] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
   const [pageError, setPageError] = useState("");
   const [monitors, setMonitors] = useState<{ id: string; name: string }[]>([]);
   const [selectedMonitorIds, setSelectedMonitorIds] = useState<string[]>([]);
@@ -25,8 +32,9 @@ export function SettingsPage() {
       api.get("/settings/notifications"),
       getMyPage(),
       api.get("/monitors"),
+      isPushSubscribed(),
     ])
-      .then(([notifRes, page, monitorsRes]) => {
+      .then(([notifRes, page, monitorsRes, pushSubscribed]) => {
         if (notifRes.data.notifications) {
           setEmailEnabled(notifRes.data.notifications.email_enabled);
         }
@@ -36,9 +44,25 @@ export function SettingsPage() {
         setOriginalSlug(page.slug);
         setMonitors(monitorsRes.data.monitors);
         setSelectedMonitorIds(page.monitor_ids || []);
+        setPushEnabled(pushSubscribed);
       })
       .finally(() => setLoading(false));
   }, []);
+
+  async function handleTogglePush() {
+    setPushLoading(true);
+    try {
+      if (pushEnabled) {
+        await unsubscribePush();
+        setPushEnabled(false);
+      } else {
+        const success = await subscribePush();
+        setPushEnabled(success);
+      }
+    } finally {
+      setPushLoading(false);
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -167,6 +191,28 @@ export function SettingsPage() {
             className="shrink-0 w-12 h-6 rounded-full bg-white/5 relative cursor-not-allowed opacity-40"
           >
             <span className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow" />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between py-3 border-t border-white/5">
+          <div>
+            <p className="text-white text-sm">Notificações no browser</p>
+            <p className="text-gray-500 text-xs mt-0.5">
+              Receber alertas mesmo com a aba fechada
+            </p>
+          </div>
+          <button
+            onClick={handleTogglePush}
+            disabled={pushLoading}
+            className={`shrink-0 w-12 h-6 rounded-full transition-all duration-200 relative disabled:opacity-50 ${
+              pushEnabled ? "bg-[#00D4AA]" : "bg-white/10"
+            }`}
+          >
+            <span
+              className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 shadow ${
+                pushEnabled ? "left-7" : "left-1"
+              }`}
+            />
           </button>
         </div>
 
