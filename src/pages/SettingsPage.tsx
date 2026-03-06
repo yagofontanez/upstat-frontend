@@ -2,12 +2,88 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
 import { getMyPage, updatePage } from "../services/pages";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Bell, Globe, User, Code } from "lucide-react";
 import {
   subscribePush,
   unsubscribePush,
   isPushSubscribed,
 } from "../services/push";
+
+function Toggle({
+  enabled,
+  onChange,
+  disabled = false,
+}: {
+  enabled: boolean;
+  onChange: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      onClick={onChange}
+      disabled={disabled}
+      style={{
+        flexShrink: 0,
+        width: "44px",
+        height: "24px",
+        borderRadius: "100px",
+        background: enabled ? "#00D4AA" : "rgba(255,255,255,0.08)",
+        border: "none",
+        cursor: disabled ? "not-allowed" : "pointer",
+        position: "relative",
+        transition: "background 0.2s",
+        opacity: disabled ? 0.4 : 1,
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          top: "4px",
+          left: enabled ? "24px" : "4px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          transition: "left 0.2s",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+        }}
+      />
+    </button>
+  );
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        background: "#0D1117",
+        border: "1px solid rgba(255,255,255,0.06)",
+        borderRadius: "12px",
+        overflow: "hidden",
+        marginBottom: "16px",
+      }}
+    >
+      <div
+        style={{
+          padding: "16px 20px",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        <span style={{ fontSize: "13px", fontWeight: 600, color: "#F0F6FC" }}>
+          {title}
+        </span>
+      </div>
+      <div style={{ padding: "20px" }}>{children}</div>
+    </div>
+  );
+}
 
 export function SettingsPage() {
   const { user } = useAuth();
@@ -35,9 +111,8 @@ export function SettingsPage() {
       isPushSubscribed(),
     ])
       .then(([notifRes, page, monitorsRes, pushSubscribed]) => {
-        if (notifRes.data.notifications) {
+        if (notifRes.data.notifications)
           setEmailEnabled(notifRes.data.notifications.email_enabled);
-        }
         setPageTitle(page.title);
         setPageDescription(page.description || "");
         setPageSlug(page.slug);
@@ -56,8 +131,8 @@ export function SettingsPage() {
         await unsubscribePush();
         setPushEnabled(false);
       } else {
-        const success = await subscribePush();
-        setPushEnabled(success);
+        const ok = await subscribePush();
+        setPushEnabled(ok);
       }
     } finally {
       setPushLoading(false);
@@ -90,9 +165,8 @@ export function SettingsPage() {
       setOriginalSlug(pageSlug);
       setPageSuccess(true);
       setTimeout(() => setPageSuccess(false), 3000);
-    } catch (err) {
+    } catch {
       setPageError("Erro ao salvar");
-      console.log("Erro ao salvar página: ", err);
     } finally {
       setSavingPage(false);
     }
@@ -100,270 +174,544 @@ export function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-6 h-6 border-2 border-[#00D4AA] border-t-transparent rounded-full animate-spin" />
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "256px",
+        }}
+      >
+        <div
+          style={{
+            width: "24px",
+            height: "24px",
+            border: "2px solid #00D4AA",
+            borderTopColor: "transparent",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }}
+        />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    background: "#060810",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "8px",
+    padding: "10px 14px",
+    color: "#F0F6FC",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "13px",
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color 0.2s",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontSize: "11px",
+    color: "#8B949E",
+    marginBottom: "6px",
+    letterSpacing: "1px",
+    textTransform: "uppercase",
+    fontFamily: "'JetBrains Mono', monospace",
+  };
+
+  const saveBtn: React.CSSProperties = {
+    background: "#00D4AA",
+    border: "none",
+    borderRadius: "8px",
+    padding: "10px 20px",
+    cursor: "pointer",
+    color: "#000",
+    fontSize: "12px",
+    fontWeight: 700,
+    fontFamily: "'JetBrains Mono', monospace",
+    transition: "background 0.2s",
+  };
+
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-white text-2xl font-bold">Configurações</h2>
-        <p className="text-gray-500 text-sm mt-1">
+    <div style={{ fontFamily: "'JetBrains Mono', 'Courier New', monospace" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .set-fade { animation: fadeUp 0.4s ease both; }
+        .set-fade-1 { animation: fadeUp 0.4s 0.05s ease both; }
+        .set-fade-2 { animation: fadeUp 0.4s 0.1s ease both; }
+        .set-fade-3 { animation: fadeUp 0.4s 0.15s ease both; }
+        .set-fade-4 { animation: fadeUp 0.4s 0.2s ease both; }
+        .input-focus:focus { border-color: #00D4AA !important; box-shadow: 0 0 0 3px rgba(0,212,170,0.08) !important; }
+        .monitor-check:hover { border-color: rgba(0,212,170,0.3) !important; }
+        .monitor-check { transition: border-color 0.15s; }
+      `}</style>
+
+      <div className="set-fade" style={{ marginBottom: "28px" }}>
+        <h2
+          style={{
+            color: "#F0F6FC",
+            fontSize: "22px",
+            fontWeight: 700,
+            letterSpacing: "-0.5px",
+            margin: "0 0 4px",
+          }}
+        >
+          Configurações
+        </h2>
+        <p style={{ color: "#555", fontSize: "12px", margin: 0 }}>
           Gerencie sua conta e notificações
         </p>
       </div>
 
-      <div className="bg-[#111827] rounded-xl border border-white/10 p-6 mb-6">
-        <h3 className="text-white font-semibold mb-4">Conta</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-gray-400 text-sm mb-1 block">Nome</label>
-            <input
-              type="text"
-              value={user?.name}
-              disabled
-              className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-gray-500 text-sm cursor-not-allowed"
-            />
-          </div>
-          <div>
-            <label className="text-gray-400 text-sm mb-1 block">Email</label>
-            <input
-              type="email"
-              value={user?.email}
-              disabled
-              className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-gray-500 text-sm cursor-not-allowed"
-            />
-          </div>
-        </div>
-        <div className="mt-4">
-          <span
-            className={`text-xs font-medium px-3 py-1 rounded-full ${
-              user?.plan === "pro"
-                ? "bg-[#00D4AA]/10 text-[#00D4AA]"
-                : "bg-white/5 text-gray-400"
-            }`}
+      <div className="set-fade-1">
+        <Section title="Conta" icon={<User size={14} />}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "14px",
+              marginBottom: "16px",
+            }}
           >
-            Plano {user?.plan === "pro" ? "Pro" : "Free"}
-          </span>
-          {user?.plan === "free" && (
-            <span className="text-gray-500 text-xs ml-3">
-              Faça upgrade para o plano Pro para desbloquear mais recursos.
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="bg-[#111827] rounded-xl border border-white/10 p-6">
-        <h3 className="text-white font-semibold mb-4">Notificações</h3>
-
-        <div className="flex items-center justify-between py-3 border-b border-white/5">
-          <div>
-            <p className="text-white text-sm">Email</p>
-            <p className="text-gray-500 text-xs mt-0.5">
-              Receber alertas de downtime por email
-            </p>
-          </div>
-          <button
-            onClick={() => setEmailEnabled(!emailEnabled)}
-            className={`shrink-0 w-12 h-6 rounded-full transition-all duration-200 relative ${
-              emailEnabled ? "bg-[#00D4AA]" : "bg-white/10"
-            }`}
-          >
-            <span
-              className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 shadow ${
-                emailEnabled ? "left-7" : "left-1"
-              }`}
-            />
-          </button>
-        </div>
-
-        <div className="flex items-center justify-between py-3">
-          <div>
-            <p className="text-white text-sm">WhatsApp</p>
-            <p className="text-gray-500 text-xs mt-0.5">
-              Disponível no plano Pro
-            </p>
-          </div>
-          <button
-            disabled
-            className="shrink-0 w-12 h-6 rounded-full bg-white/5 relative cursor-not-allowed opacity-40"
-          >
-            <span className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow" />
-          </button>
-        </div>
-
-        <div className="flex items-center justify-between py-3 border-t border-white/5">
-          <div>
-            <p className="text-white text-sm">Notificações no browser</p>
-            <p className="text-gray-500 text-xs mt-0.5">
-              Receber alertas mesmo com a aba fechada
-            </p>
-          </div>
-          <button
-            onClick={handleTogglePush}
-            disabled={pushLoading}
-            className={`shrink-0 w-12 h-6 rounded-full transition-all duration-200 relative disabled:opacity-50 ${
-              pushEnabled ? "bg-[#00D4AA]" : "bg-white/10"
-            }`}
-          >
-            <span
-              className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 shadow ${
-                pushEnabled ? "left-7" : "left-1"
-              }`}
-            />
-          </button>
-        </div>
-
-        <div className="mt-4 flex items-center gap-3">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-[#00D4AA] hover:bg-[#00bfa0] text-black font-semibold px-5 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
-          >
-            {saving ? "Salvando..." : "Salvar"}
-          </button>
-          {success && (
-            <span className="text-green-400 text-sm">✓ Salvo com sucesso</span>
-          )}
-        </div>
-      </div>
-
-      <div className="bg-[#111827] rounded-xl border border-white/10 p-6 mt-6">
-        <h3 className="text-white font-semibold mb-1">Badge para README</h3>
-        <p className="text-gray-500 text-sm mb-4">
-          Cole no README do seu projeto no GitHub para mostrar o status em tempo
-          real.
-        </p>
-
-        <div className="bg-[#0A0E1A] border border-white/10 rounded-lg p-4 mb-4">
-          <p className="text-gray-500 text-xs mb-2">Preview</p>
-          <img
-            src={`${import.meta.env.VITE_API_URL}/badge/${originalSlug}`}
-            alt="uptime badge"
-          />
-        </div>
-
-        <div className="bg-[#0A0E1A] border border-white/10 rounded-lg p-4">
-          <p className="text-gray-500 text-xs mb-2">Markdown</p>
-          <code className="text-[#00D4AA] text-xs break-all">
-            {`![uptime](${import.meta.env.VITE_API_URL}/badge/${originalSlug})`}
-          </code>
-        </div>
-      </div>
-
-      <div className="bg-[#111827] rounded-xl border border-white/10 p-6 mt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-white font-semibold">Status Page</h3>
-          <a
-            href={`/status/${pageSlug || originalSlug}`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-1 text-[#00D4AA] text-xs hover:underline"
-          >
-            Ver página <ExternalLink size={12} />
-          </a>
-        </div>
-
-        {pageError && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg p-3 mb-4">
-            {pageError}
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="text-gray-400 text-sm mb-1 block">Título</label>
-            <input
-              type="text"
-              value={pageTitle}
-              onChange={(e) => setPageTitle(e.target.value)}
-              className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00D4AA] transition-colors"
-              placeholder="Minha Status Page"
-            />
-          </div>
-          <div>
-            <label className="text-gray-400 text-sm mb-1 block">
-              Slug
-              {user?.plan !== "pro" && (
-                <span className="ml-2 text-xs text-yellow-400">
-                  — somente Pro
-                </span>
-              )}
-            </label>
-            <div className="flex items-center bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 gap-1">
-              <span className="text-gray-600 text-sm">upstat.app/status/</span>
+            <div>
+              <label style={labelStyle}>Nome</label>
               <input
                 type="text"
-                value={pageSlug}
-                onChange={(e) => setPageSlug(e.target.value)}
-                disabled={user?.plan !== "pro"}
-                className="flex-1 bg-transparent text-white text-sm focus:outline-none disabled:text-gray-500 disabled:cursor-not-allowed"
-                placeholder="meu-slug"
+                value={user?.name}
+                disabled
+                style={{ ...inputStyle, color: "#555", cursor: "not-allowed" }}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Email</label>
+              <input
+                type="email"
+                value={user?.email}
+                disabled
+                style={{ ...inputStyle, color: "#555", cursor: "not-allowed" }}
               />
             </div>
           </div>
-        </div>
-
-        <div className="mb-4">
-          <label className="text-gray-400 text-sm mb-2 block">
-            Monitores exibidos na page
-          </label>
-          <div className="space-y-2">
-            {monitors.length === 0 ? (
-              <p className="text-gray-600 text-sm">
-                Nenhum monitor cadastrado ainda.
-              </p>
-            ) : (
-              monitors.map((monitor) => (
-                <label
-                  key={monitor.id}
-                  className="flex items-center gap-3 p-3 bg-[#0A0E1A] border border-white/10 rounded-lg cursor-pointer hover:border-[#00D4AA]/30 transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedMonitorIds.includes(monitor.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedMonitorIds((prev) => [...prev, monitor.id]);
-                      } else {
-                        setSelectedMonitorIds((prev) =>
-                          prev.filter((id) => id !== monitor.id),
-                        );
-                      }
-                    }}
-                    className="accent-[#00D4AA]"
-                  />
-                  <span className="text-white text-sm">{monitor.name}</span>
-                </label>
-              ))
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span
+              style={{
+                fontSize: "11px",
+                padding: "4px 12px",
+                borderRadius: "100px",
+                fontWeight: 600,
+                background:
+                  user?.plan === "pro"
+                    ? "rgba(0,212,170,0.08)"
+                    : "rgba(255,255,255,0.04)",
+                color: user?.plan === "pro" ? "#00D4AA" : "#555",
+                border: `1px solid ${user?.plan === "pro" ? "rgba(0,212,170,0.15)" : "rgba(255,255,255,0.08)"}`,
+              }}
+            >
+              {user?.plan === "pro" ? "⚡ Pro" : "Free"}
+            </span>
+            {user?.plan === "free" && (
+              <span style={{ fontSize: "11px", color: "#555" }}>
+                Faça upgrade para desbloquear mais recursos.
+              </span>
             )}
           </div>
-        </div>
+        </Section>
+      </div>
 
-        <div className="mb-4">
-          <label className="text-gray-400 text-sm mb-1 block">Descrição</label>
-          <input
-            type="text"
-            value={pageDescription}
-            onChange={(e) => setPageDescription(e.target.value)}
-            className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00D4AA] transition-colors"
-            placeholder="Acompanhe o status dos nossos serviços em tempo real."
-          />
-        </div>
+      <div className="set-fade-2">
+        <Section title="Notificações" icon={<Bell size={14} />}>
+          {[
+            {
+              label: "Email",
+              desc: "Alertas de downtime por email",
+              enabled: emailEnabled,
+              onChange: () => setEmailEnabled(!emailEnabled),
+              disabled: false,
+            },
+            {
+              label: "WhatsApp",
+              desc: "Disponível no plano Pro",
+              enabled: false,
+              onChange: () => {},
+              disabled: true,
+            },
+            {
+              label: "Notificações no browser",
+              desc: "Alertas mesmo com a aba fechada",
+              enabled: pushEnabled,
+              onChange: handleTogglePush,
+              disabled: pushLoading,
+            },
+          ].map((item, i, arr) => (
+            <div
+              key={item.label}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingBottom: i < arr.length - 1 ? "16px" : "0",
+                marginBottom: i < arr.length - 1 ? "16px" : "0",
+                borderBottom:
+                  i < arr.length - 1
+                    ? "1px solid rgba(255,255,255,0.04)"
+                    : "none",
+              }}
+            >
+              <div>
+                <p
+                  style={{
+                    color: "#F0F6FC",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    margin: "0 0 2px",
+                  }}
+                >
+                  {item.label}
+                </p>
+                <p style={{ color: "#555", fontSize: "11px", margin: 0 }}>
+                  {item.desc}
+                </p>
+              </div>
+              <Toggle
+                enabled={item.enabled}
+                onChange={item.onChange}
+                disabled={item.disabled}
+              />
+            </div>
+          ))}
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSavePage}
-            disabled={savingPage}
-            className="bg-[#00D4AA] hover:bg-[#00bfa0] text-black font-semibold px-5 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginTop: "20px",
+              paddingTop: "16px",
+              borderTop: "1px solid rgba(255,255,255,0.04)",
+            }}
           >
-            {savingPage ? "Salvando..." : "Salvar"}
-          </button>
-          {pageSuccess && (
-            <span className="text-green-400 text-sm">✓ Salvo com sucesso</span>
-          )}
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              style={{ ...saveBtn, opacity: saving ? 0.5 : 1 }}
+            >
+              {saving ? "Salvando..." : "Salvar"}
+            </button>
+            {success && (
+              <span style={{ fontSize: "12px", color: "#22C55E" }}>
+                ✓ Salvo
+              </span>
+            )}
+          </div>
+        </Section>
+      </div>
+
+      <div className="set-fade-3">
+        <Section title="Badge para README" icon={<Code size={14} />}>
+          <p
+            style={{
+              color: "#555",
+              fontSize: "12px",
+              marginBottom: "16px",
+              lineHeight: 1.6,
+            }}
+          >
+            Cole no README do seu projeto no GitHub para mostrar o status em
+            tempo real.
+          </p>
+          <div
+            style={{
+              background: "#060810",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: "8px",
+              padding: "16px",
+              marginBottom: "10px",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "10px",
+                color: "#555",
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+              }}
+            >
+              Preview
+            </p>
+            <img
+              src={`${import.meta.env.VITE_API_URL}/badge/${originalSlug}`}
+              alt="uptime badge"
+            />
+          </div>
+          <div
+            style={{
+              background: "#060810",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: "8px",
+              padding: "16px",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "10px",
+                color: "#555",
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+              }}
+            >
+              Markdown
+            </p>
+            <code
+              style={{
+                color: "#00D4AA",
+                fontSize: "12px",
+                wordBreak: "break-all",
+              }}
+            >
+              {`![uptime](${import.meta.env.VITE_API_URL}/badge/${originalSlug})`}
+            </code>
+          </div>
+        </Section>
+      </div>
+
+      <div className="set-fade-4">
+        <div
+          style={{
+            background: "#0D1117",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: "12px",
+            overflow: "hidden",
+            marginBottom: "16px",
+          }}
+        >
+          <div
+            style={{
+              padding: "16px 20px",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Globe size={14} color="#555" />
+              <span
+                style={{ fontSize: "13px", fontWeight: 600, color: "#F0F6FC" }}
+              >
+                Status Page
+              </span>
+            </div>
+            <a
+              href={`/status/${pageSlug || originalSlug}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontSize: "12px",
+                color: "#00D4AA",
+                textDecoration: "none",
+                opacity: 0.8,
+              }}
+            >
+              Ver página <ExternalLink size={11} />
+            </a>
+          </div>
+
+          <div style={{ padding: "20px" }}>
+            {pageError && (
+              <div
+                style={{
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.2)",
+                  borderRadius: "8px",
+                  padding: "10px 14px",
+                  marginBottom: "16px",
+                  fontSize: "12px",
+                  color: "#EF4444",
+                }}
+              >
+                {pageError}
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "14px",
+                marginBottom: "14px",
+              }}
+            >
+              <div>
+                <label style={labelStyle}>Título</label>
+                <input
+                  type="text"
+                  value={pageTitle}
+                  onChange={(e) => setPageTitle(e.target.value)}
+                  style={inputStyle}
+                  className="input-focus"
+                  placeholder="Minha Status Page"
+                />
+              </div>
+              <div>
+                <label
+                  style={{
+                    ...labelStyle,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  Slug
+                  {user?.plan !== "pro" && (
+                    <span
+                      style={{
+                        color: "#F59E0B",
+                        fontSize: "10px",
+                        textTransform: "none",
+                        letterSpacing: 0,
+                        fontWeight: 600,
+                      }}
+                    >
+                      somente Pro
+                    </span>
+                  )}
+                </label>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: "#060810",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    gap: "4px",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "#555",
+                      fontSize: "12px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    upstat.app/status/
+                  </span>
+                  <input
+                    type="text"
+                    value={pageSlug}
+                    onChange={(e) => setPageSlug(e.target.value)}
+                    disabled={user?.plan !== "pro"}
+                    style={{
+                      flex: 1,
+                      background: "none",
+                      border: "none",
+                      outline: "none",
+                      color: user?.plan !== "pro" ? "#555" : "#F0F6FC",
+                      fontSize: "13px",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      cursor: user?.plan !== "pro" ? "not-allowed" : "text",
+                    }}
+                    placeholder="meu-slug"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "14px" }}>
+              <label style={labelStyle}>Descrição</label>
+              <input
+                type="text"
+                value={pageDescription}
+                onChange={(e) => setPageDescription(e.target.value)}
+                style={inputStyle}
+                className="input-focus"
+                placeholder="Acompanhe o status dos nossos serviços."
+              />
+            </div>
+
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ ...labelStyle, marginBottom: "10px" }}>
+                Monitores exibidos
+              </label>
+              {monitors.length === 0 ? (
+                <p style={{ color: "#555", fontSize: "12px" }}>
+                  Nenhum monitor cadastrado ainda.
+                </p>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  {monitors.map((monitor) => (
+                    <label
+                      key={monitor.id}
+                      className="monitor-check"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        padding: "10px 14px",
+                        background: "#060810",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedMonitorIds.includes(monitor.id)}
+                        onChange={(e) => {
+                          if (e.target.checked)
+                            setSelectedMonitorIds((prev) => [
+                              ...prev,
+                              monitor.id,
+                            ]);
+                          else
+                            setSelectedMonitorIds((prev) =>
+                              prev.filter((id) => id !== monitor.id),
+                            );
+                        }}
+                        style={{
+                          accentColor: "#00D4AA",
+                          width: "14px",
+                          height: "14px",
+                        }}
+                      />
+                      <span style={{ color: "#F0F6FC", fontSize: "13px" }}>
+                        {monitor.name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <button
+                onClick={handleSavePage}
+                disabled={savingPage}
+                style={{ ...saveBtn, opacity: savingPage ? 0.5 : 1 }}
+              >
+                {savingPage ? "Salvando..." : "Salvar"}
+              </button>
+              {pageSuccess && (
+                <span style={{ fontSize: "12px", color: "#22C55E" }}>
+                  ✓ Salvo
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

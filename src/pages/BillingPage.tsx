@@ -1,7 +1,27 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
-import { CheckCircle, Zap } from "lucide-react";
+import { CheckCircle, Zap, Lock } from "lucide-react";
+
+const FREE_FEATURES = [
+  "3 monitores",
+  "Ping a cada 5 minutos",
+  "Histórico de 7 dias",
+  "URL aleatória",
+  "Notificação por email",
+];
+
+const PRO_FEATURES = [
+  "Monitores ilimitados",
+  "Ping a cada 1 minuto",
+  "Histórico de 90 dias",
+  "URL personalizada",
+  "Notificação por email",
+  "Notificação por WhatsApp",
+  "Múltiplos serviços na page",
+  "Relatório semanal",
+  "Exportar histórico CSV",
+];
 
 export function BillingPage() {
   const { user, refreshUser } = useAuth();
@@ -20,107 +40,361 @@ export function BillingPage() {
       });
       window.open(res.data.payment_url, "_blank");
       setPaid(true);
-    } catch (err) {
+    } catch {
       setError("Erro ao processar upgrade");
-      console.log("Erro ao processar upgrade: ", err);
     } finally {
       setLoading(false);
     }
   }
 
+  const isPro = user?.plan === "pro";
+
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-white text-2xl font-bold">Plano</h2>
-        <p className="text-gray-500 text-sm mt-1">Gerencie sua assinatura</p>
+    <div style={{ fontFamily: "'JetBrains Mono', 'Courier New', monospace" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .bill-fade { animation: fadeUp 0.4s ease both; }
+        .bill-fade-1 { animation: fadeUp 0.4s 0.05s ease both; }
+        .bill-fade-2 { animation: fadeUp 0.4s 0.1s ease both; }
+        .input-cpf {
+          width: 100%;
+          background: #060810;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 8px;
+          padding: 11px 14px;
+          color: #F0F6FC;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 13px;
+          outline: none;
+          box-sizing: border-box;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-cpf:focus {
+          border-color: #00D4AA;
+          box-shadow: 0 0 0 3px rgba(0,212,170,0.08);
+        }
+        .input-cpf::placeholder { color: #555; }
+      `}</style>
+
+      <div className="bill-fade" style={{ marginBottom: "32px" }}>
+        <h2
+          style={{
+            color: "#F0F6FC",
+            fontSize: "22px",
+            fontWeight: 700,
+            letterSpacing: "-0.5px",
+            margin: "0 0 4px",
+          }}
+        >
+          Plano
+        </h2>
+        <p style={{ color: "#555", fontSize: "12px", margin: 0 }}>
+          Gerencie sua assinatura
+        </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 max-w-3xl">
-        <div
-          className={`bg-[#111827] rounded-xl border p-6 ${user?.plan === "free" ? "border-[#00D4AA]/40" : "border-white/10"}`}
+      <div
+        className="bill-fade-1"
+        style={{
+          background: isPro ? "rgba(0,212,170,0.04)" : "rgba(255,255,255,0.02)",
+          border: `1px solid ${isPro ? "rgba(0,212,170,0.15)" : "rgba(255,255,255,0.06)"}`,
+          borderRadius: "12px",
+          padding: "16px 20px",
+          marginBottom: "24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {isPro ? (
+            <Zap size={16} color="#00D4AA" />
+          ) : (
+            <Lock size={16} color="#555" />
+          )}
+          <div>
+            <span
+              style={{ fontSize: "13px", color: "#F0F6FC", fontWeight: 600 }}
+            >
+              Você está no plano {isPro ? "Pro" : "Free"}
+            </span>
+            <p
+              style={{
+                fontSize: "11px",
+                color: isPro ? "#00D4AA" : "#555",
+                margin: "2px 0 0",
+              }}
+            >
+              {isPro
+                ? "Todos os recursos desbloqueados"
+                : "Faça upgrade para desbloquear todos os recursos"}
+            </p>
+          </div>
+        </div>
+        <span
+          style={{
+            fontSize: "11px",
+            padding: "4px 12px",
+            borderRadius: "100px",
+            background: isPro
+              ? "rgba(0,212,170,0.1)"
+              : "rgba(255,255,255,0.06)",
+            color: isPro ? "#00D4AA" : "#555",
+            border: `1px solid ${isPro ? "rgba(0,212,170,0.2)" : "rgba(255,255,255,0.08)"}`,
+            fontWeight: 600,
+          }}
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-semibold">Free</h3>
-            {user?.plan === "free" && (
-              <span className="text-xs bg-[#00D4AA]/10 text-[#00D4AA] px-2 py-1 rounded-full">
+          {isPro ? "● Ativo" : "Free"}
+        </span>
+      </div>
+
+      <div
+        className="bill-fade-2"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "16px",
+          maxWidth: "780px",
+        }}
+      >
+        <div
+          style={{
+            background: "#0D1117",
+            border: `1px solid ${!isPro ? "rgba(0,212,170,0.2)" : "rgba(255,255,255,0.06)"}`,
+            borderRadius: "16px",
+            padding: "28px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "16px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "13px",
+                fontWeight: 700,
+                color: "#8B949E",
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+              }}
+            >
+              Free
+            </span>
+            {!isPro && (
+              <span
+                style={{
+                  fontSize: "10px",
+                  padding: "3px 10px",
+                  borderRadius: "100px",
+                  background: "rgba(0,212,170,0.08)",
+                  color: "#00D4AA",
+                  border: "1px solid rgba(0,212,170,0.15)",
+                  fontWeight: 600,
+                }}
+              >
                 Plano atual
               </span>
             )}
           </div>
-          <p className="text-3xl font-bold text-white mb-6">
-            R$0<span className="text-gray-500 text-sm font-normal">/mês</span>
-          </p>
-          <ul className="space-y-3">
-            {[
-              "3 monitores",
-              "Ping a cada 5 minutos",
-              "Histórico de 7 dias",
-              "URL aleatória",
-              "Notificação por email",
-            ].map((item) => (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: "4px",
+              marginBottom: "20px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "40px",
+                fontWeight: 700,
+                color: "#F0F6FC",
+                letterSpacing: "-2px",
+              }}
+            >
+              R$0
+            </span>
+            <span style={{ fontSize: "13px", color: "#555" }}>/mês</span>
+          </div>
+          <div
+            style={{
+              width: "100%",
+              height: "1px",
+              background: "rgba(255,255,255,0.04)",
+              marginBottom: "20px",
+            }}
+          />
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+            }}
+          >
+            {FREE_FEATURES.map((item) => (
               <li
                 key={item}
-                className="flex items-center gap-2 text-gray-400 text-sm"
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
-                <CheckCircle size={14} className="text-gray-600 shrink-0" />
-                {item}
+                <CheckCircle size={13} color="#333" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: "12px", color: "#8B949E" }}>
+                  {item}
+                </span>
               </li>
             ))}
           </ul>
         </div>
 
         <div
-          className={`bg-[#111827] rounded-xl border p-6 ${user?.plan === "pro" ? "border-[#00D4AA]/40" : "border-white/10"}`}
+          style={{
+            background: "#0D1117",
+            border: `1px solid ${isPro ? "rgba(0,212,170,0.2)" : "rgba(0,212,170,0.12)"}`,
+            borderRadius: "16px",
+            padding: "28px",
+            position: "relative",
+            overflow: "hidden",
+          }}
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-semibold flex items-center gap-2">
-              <Zap size={16} className="text-[#00D4AA]" />
-              Pro
-            </h3>
-            {user?.plan === "pro" && (
-              <span className="text-xs bg-[#00D4AA]/10 text-[#00D4AA] px-2 py-1 rounded-full">
-                Plano atual
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "200px",
+              height: "1px",
+              background:
+                "linear-gradient(90deg, transparent, rgba(0,212,170,0.4), transparent)",
+            }}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "16px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Zap size={14} color="#00D4AA" />
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#00D4AA",
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                }}
+              >
+                Pro
               </span>
-            )}
+            </div>
+            <span
+              style={{
+                fontSize: "10px",
+                padding: "3px 10px",
+                borderRadius: "100px",
+                background: "rgba(0,212,170,0.06)",
+                color: "#00D4AA",
+                border: "1px solid rgba(0,212,170,0.12)",
+                fontWeight: 600,
+              }}
+            >
+              {isPro ? "Plano atual" : "Recomendado"}
+            </span>
           </div>
-          <p className="text-3xl font-bold text-white mb-6">
-            R$29<span className="text-gray-500 text-sm font-normal">/mês</span>
-          </p>
-          <ul className="space-y-3 mb-6">
-            {[
-              "Monitores ilimitados",
-              "Ping a cada 1 minuto",
-              "Histórico de 90 dias",
-              "URL personalizada",
-              "Notificação por email",
-              "Notificação por WhatsApp",
-              "Múltiplos serviços na page",
-            ].map((item) => (
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: "4px",
+              marginBottom: "20px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "40px",
+                fontWeight: 700,
+                color: "#F0F6FC",
+                letterSpacing: "-2px",
+              }}
+            >
+              R$29
+            </span>
+            <span style={{ fontSize: "13px", color: "#555" }}>/mês</span>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              height: "1px",
+              background: "rgba(255,255,255,0.04)",
+              marginBottom: "20px",
+            }}
+          />
+
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: "0 0 24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+            }}
+          >
+            {PRO_FEATURES.map((item) => (
               <li
                 key={item}
-                className="flex items-center gap-2 text-gray-400 text-sm"
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
-                <CheckCircle size={14} className="text-[#00D4AA] shrink-0" />
-                {item}
+                <CheckCircle
+                  size={13}
+                  color="#00D4AA"
+                  style={{ flexShrink: 0 }}
+                />
+                <span style={{ fontSize: "12px", color: "#8B949E" }}>
+                  {item}
+                </span>
               </li>
             ))}
           </ul>
 
-          {user?.plan !== "pro" && (
+          {!isPro && (
             <form onSubmit={handleUpgrade}>
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg p-3 mb-3">
+                <div
+                  style={{
+                    background: "rgba(239,68,68,0.08)",
+                    border: "1px solid rgba(239,68,68,0.2)",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    marginBottom: "12px",
+                    fontSize: "12px",
+                    color: "#EF4444",
+                  }}
+                >
                   {error}
                 </div>
               )}
               {!paid ? (
                 <>
-                  <div className="mb-3">
+                  <div style={{ marginBottom: "10px" }}>
                     <input
                       type="text"
                       value={cpf}
                       onChange={(e) => setCpf(e.target.value)}
-                      className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00D4AA] transition-colors"
+                      className="input-cpf"
                       placeholder="CPF ou CNPJ"
                       required
                     />
@@ -128,16 +402,46 @@ export function BillingPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#00D4AA] hover:bg-[#00bfa0] text-black font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50"
+                    style={{
+                      width: "100%",
+                      background: "#00D4AA",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "12px",
+                      cursor: "pointer",
+                      color: "#000",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      opacity: loading ? 0.5 : 1,
+                      transition: "background 0.2s",
+                    }}
                   >
                     {loading ? "Processando..." : "Fazer upgrade →"}
                   </button>
+                  <p
+                    style={{
+                      fontSize: "10px",
+                      color: "#333",
+                      textAlign: "center",
+                      margin: "10px 0 0",
+                    }}
+                  >
+                    Pagamento seguro via Asaas · Cancele quando quiser
+                  </p>
                 </>
               ) : (
-                <div className="space-y-3">
-                  <p className="text-gray-400 text-sm">
-                    Após concluir o pagamento, clique no botão abaixo para
-                    atualizar seu plano.
+                <div>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      color: "#8B949E",
+                      marginBottom: "12px",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    Após concluir o pagamento, clique abaixo para atualizar seu
+                    plano.
                   </p>
                   <button
                     type="button"
@@ -145,13 +449,40 @@ export function BillingPage() {
                       await refreshUser();
                       setPaid(false);
                     }}
-                    className="w-full bg-[#00D4AA] hover:bg-[#00bfa0] text-black font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                    style={{
+                      width: "100%",
+                      background: "#00D4AA",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "12px",
+                      cursor: "pointer",
+                      color: "#000",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
                   >
                     Já paguei, atualizar plano
                   </button>
                 </div>
               )}
             </form>
+          )}
+
+          {isPro && (
+            <div
+              style={{
+                padding: "14px",
+                background: "rgba(0,212,170,0.04)",
+                border: "1px solid rgba(0,212,170,0.1)",
+                borderRadius: "8px",
+                textAlign: "center",
+              }}
+            >
+              <span style={{ fontSize: "12px", color: "#00D4AA" }}>
+                ✓ Plano ativo
+              </span>
+            </div>
           )}
         </div>
       </div>

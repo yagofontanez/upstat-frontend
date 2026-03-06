@@ -6,6 +6,10 @@ import {
   ExternalLink,
   RefreshCw,
   HelpCircle,
+  Pause,
+  Play,
+  Zap,
+  Activity,
 } from "lucide-react";
 import {
   getMonitors,
@@ -18,9 +22,70 @@ import {
 import { useNavigate } from "react-router-dom";
 import { UpgradeModal } from "../components/UpgradeModal";
 
+function StatusBadge({ status }: { status: string }) {
+  const config = {
+    up: {
+      label: "Online",
+      bg: "rgba(34,197,94,0.08)",
+      border: "rgba(34,197,94,0.2)",
+      color: "#22C55E",
+      dot: "#22C55E",
+    },
+    down: {
+      label: "Offline",
+      bg: "rgba(239,68,68,0.08)",
+      border: "rgba(239,68,68,0.2)",
+      color: "#EF4444",
+      dot: "#EF4444",
+    },
+    pending: {
+      label: "Verificando",
+      bg: "rgba(245,158,11,0.08)",
+      border: "rgba(245,158,11,0.2)",
+      color: "#F59E0B",
+      dot: "#F59E0B",
+    },
+  }[status] ?? {
+    label: status,
+    bg: "rgba(255,255,255,0.05)",
+    border: "rgba(255,255,255,0.1)",
+    color: "#8B949E",
+    dot: "#8B949E",
+  };
+
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "5px",
+        fontSize: "11px",
+        padding: "3px 10px",
+        borderRadius: "100px",
+        background: config.bg,
+        border: `1px solid ${config.border}`,
+        color: config.color,
+        fontWeight: 600,
+        marginRight: 10,
+      }}
+    >
+      <span
+        style={{
+          width: "5px",
+          height: "5px",
+          borderRadius: "50%",
+          background: config.dot,
+          flexShrink: 0,
+        }}
+      />
+      {config.label}
+    </span>
+  );
+}
+
 export function MonitorsPage() {
   const navigate = useNavigate();
-
   const [pinging, setPinging] = useState<string | null>(null);
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,39 +178,139 @@ export function MonitorsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-6 h-6 border-2 border-[#00D4AA] border-t-transparent rounded-full animate-spin" />
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "256px",
+        }}
+      >
+        <div
+          style={{
+            width: "24px",
+            height: "24px",
+            border: "2px solid #00D4AA",
+            borderTopColor: "transparent",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }}
+        />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    background: "#060810",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "8px",
+    padding: "10px 14px",
+    color: "#F0F6FC",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "13px",
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color 0.2s",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontSize: "11px",
+    color: "#8B949E",
+    marginBottom: "6px",
+    letterSpacing: "1px",
+    textTransform: "uppercase",
+    fontFamily: "'JetBrains Mono', monospace",
+  };
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
+    <div style={{ fontFamily: "'JetBrains Mono', 'Courier New', monospace" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .mon-fade { animation: fadeUp 0.35s ease both; }
+        .monitor-card:hover { background: rgba(255,255,255,0.015) !important; }
+        .monitor-card { transition: background 0.15s; }
+        .icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: color 0.15s, opacity 0.15s; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+        .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .input-focus:focus { border-color: #00D4AA !important; box-shadow: 0 0 0 3px rgba(0,212,170,0.08) !important; outline: none !important; }
+      `}</style>
+
+      <div
+        className="mon-fade"
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          marginBottom: "32px",
+        }}
+      >
         <div>
-          <h2 className="text-white text-2xl font-bold">Monitores</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            Gerencie os seus serviços monitorados
+          <h2
+            style={{
+              color: "#F0F6FC",
+              fontSize: "22px",
+              fontWeight: 700,
+              letterSpacing: "-0.5px",
+              margin: "0 0 4px",
+            }}
+          >
+            Monitores
+          </h2>
+          <p style={{ color: "#555", fontSize: "12px", margin: 0 }}>
+            {monitors.length} monitor{monitors.length !== 1 ? "es" : ""}{" "}
+            cadastrado{monitors.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className={`flex items-center gap-2 border px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 ${
-              refreshed
-                ? "text-[#00D4AA] border-[#00D4AA]/30"
-                : "text-gray-400 hover:text-white border-white/10 hover:border-white/20"
-            }`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              background: "none",
+              border: `1px solid ${refreshed ? "rgba(0,212,170,0.3)" : "rgba(255,255,255,0.08)"}`,
+              borderRadius: "8px",
+              padding: "8px 14px",
+              cursor: "pointer",
+              color: refreshed ? "#00D4AA" : "#8B949E",
+              fontSize: "12px",
+              fontFamily: "'JetBrains Mono', monospace",
+              transition: "all 0.2s",
+            }}
           >
-            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+            <RefreshCw
+              size={13}
+              style={{
+                animation: refreshing ? "spin 0.8s linear infinite" : "none",
+              }}
+            />
             {refreshed ? "Atualizado!" : "Atualizar"}
           </button>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 bg-[#00D4AA] hover:bg-[#00bfa0] text-black font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              background: "#00D4AA",
+              border: "none",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              cursor: "pointer",
+              color: "#000",
+              fontSize: "12px",
+              fontWeight: 700,
+              fontFamily: "'JetBrains Mono', monospace",
+              transition: "background 0.2s",
+            }}
           >
-            <Plus size={16} />
+            <Plus size={14} />
             Novo monitor
           </button>
         </div>
@@ -154,100 +319,198 @@ export function MonitorsPage() {
       {showForm && (
         <form
           onSubmit={handleCreate}
-          className="bg-[#111827] rounded-xl border border-[#00D4AA]/30 p-6 mb-6"
+          className="mon-fade"
+          style={{
+            background: "#0D1117",
+            border: "1px solid rgba(0,212,170,0.2)",
+            borderRadius: "12px",
+            padding: "24px",
+            marginBottom: "20px",
+          }}
         >
-          <h3 className="text-white font-semibold mb-4">Novo monitor</h3>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "20px",
+            }}
+          >
+            <span
+              style={{ fontSize: "13px", fontWeight: 700, color: "#F0F6FC" }}
+            >
+              Novo monitor
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#555",
+                fontSize: "18px",
+              }}
+            >
+              ×
+            </button>
+          </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg p-3 mb-4">
+            <div
+              style={{
+                background: "rgba(239,68,68,0.08)",
+                border: "1px solid rgba(239,68,68,0.2)",
+                borderRadius: "8px",
+                padding: "10px 14px",
+                marginBottom: "16px",
+                fontSize: "12px",
+                color: "#EF4444",
+              }}
+            >
               {error}
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "14px",
+              marginBottom: "14px",
+            }}
+          >
             <div>
-              <label className="text-gray-400 text-sm mb-1 block">Nome</label>
+              <label style={labelStyle}>Nome</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00D4AA] transition-colors"
+                style={inputStyle}
+                className="input-focus"
                 placeholder="Minha API"
                 required
               />
             </div>
             <div>
-              <label className="text-gray-400 text-sm mb-1 block">Tipo</label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setMonitorType("http")}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    monitorType === "http"
-                      ? "bg-[#00D4AA] text-black"
-                      : "bg-[#0A0E1A] text-gray-400 border border-white/10"
-                  }`}
-                >
-                  HTTP
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMonitorType("tcp")}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    monitorType === "tcp"
-                      ? "bg-[#00D4AA] text-black"
-                      : "bg-[#0A0E1A] text-gray-400 border border-white/10"
-                  }`}
-                >
-                  TCP
-                </button>
+              <label style={labelStyle}>Tipo</label>
+              <div style={{ display: "flex", gap: "6px" }}>
+                {(["http", "tcp"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setMonitorType(t)}
+                    style={{
+                      flex: 1,
+                      padding: "10px",
+                      borderRadius: "8px",
+                      border: "none",
+                      cursor: "pointer",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      transition: "all 0.15s",
+                      background:
+                        monitorType === t
+                          ? "#00D4AA"
+                          : "rgba(255,255,255,0.04)",
+                      color: monitorType === t ? "#000" : "#555",
+                    }}
+                  >
+                    {t.toUpperCase()}
+                  </button>
+                ))}
               </div>
             </div>
-            {monitorType === "tcp" && (
-              <div>
-                <label className="text-gray-400 text-sm mb-1 block">
-                  Porta
-                </label>
-                <input
-                  type="number"
-                  value={tcpPort}
-                  onChange={(e) => setTcpPort(e.target.value)}
-                  className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00D4AA] transition-colors"
-                  placeholder="ex: 5432"
-                />
-              </div>
-            )}
+
             <div>
-              <label className="text-gray-400 text-sm mb-1 block">URL</label>
+              <label style={labelStyle}>URL</label>
               <input
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00D4AA] transition-colors"
+                style={inputStyle}
+                className="input-focus"
                 placeholder="https://minha-api.com/health"
                 required
               />
             </div>
+
+            {monitorType === "tcp" && (
+              <div>
+                <label style={labelStyle}>Porta</label>
+                <input
+                  type="number"
+                  value={tcpPort}
+                  onChange={(e) => setTcpPort(e.target.value)}
+                  style={inputStyle}
+                  className="input-focus"
+                  placeholder="ex: 5432"
+                />
+              </div>
+            )}
+
             {monitorType === "http" && (
               <div>
-                <label className="text-gray-400 text-sm mb-1 flex items-center gap-2">
+                <label
+                  style={{
+                    ...labelStyle,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
                   Keyword{" "}
-                  <span className="text-gray-600 text-xs">(opcional)</span>
-                  <div className="relative">
+                  <span
+                    style={{
+                      color: "#333",
+                      textTransform: "none",
+                      letterSpacing: 0,
+                    }}
+                  >
+                    (opcional)
+                  </span>
+                  <div style={{ position: "relative" }}>
                     <button
                       type="button"
                       onMouseEnter={() => setShowKeywordTip(true)}
                       onMouseLeave={() => setShowKeywordTip(false)}
-                      className="text-gray-600 hover:text-gray-400 transition-colors"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#555",
+                        display: "flex",
+                        padding: 0,
+                      }}
                     >
-                      <HelpCircle size={13} />
+                      <HelpCircle size={12} />
                     </button>
                     {showKeywordTip && (
-                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 bg-[#1f2937] border border-white/10 rounded-lg p-3 text-xs text-gray-400 leading-relaxed z-10 shadow-xl">
-                        Se preenchida, o UpStat verifica se esta palavra aparece
-                        na resposta do servidor. Se não aparecer, o monitor é
-                        marcado como offline — mesmo que o status HTTP seja 200.
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[#1f2937] border-r border-b border-white/10 rotate-45 -mt-1" />
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          bottom: "calc(100% + 8px)",
+                          width: "240px",
+                          background: "#1C2128",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: "8px",
+                          padding: "12px",
+                          fontSize: "11px",
+                          color: "#8B949E",
+                          lineHeight: 1.6,
+                          zIndex: 10,
+                          boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                          fontWeight: 400,
+                          textTransform: "none",
+                          letterSpacing: 0,
+                        }}
+                      >
+                        Verifica se esta palavra aparece na resposta. Se não
+                        aparecer, o monitor é marcado como offline mesmo com
+                        status 200.
                       </div>
                     )}
                   </div>
@@ -256,25 +519,44 @@ export function MonitorsPage() {
                   type="text"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  className="w-full bg-[#0A0E1A] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00D4AA] transition-colors"
-                  placeholder='ex: "operational" ou "ok"'
+                  style={inputStyle}
+                  className="input-focus"
+                  placeholder='"operational" ou "ok"'
                 />
               </div>
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div style={{ display: "flex", gap: "10px" }}>
             <button
               type="submit"
               disabled={creating}
-              className="bg-[#00D4AA] hover:bg-[#00bfa0] text-black font-semibold px-5 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
+              style={{
+                background: "#00D4AA",
+                border: "none",
+                borderRadius: "8px",
+                padding: "10px 20px",
+                cursor: "pointer",
+                color: "#000",
+                fontSize: "12px",
+                fontWeight: 700,
+                fontFamily: "'JetBrains Mono', monospace",
+                opacity: creating ? 0.5 : 1,
+              }}
             >
               {creating ? "Criando..." : "Criar monitor"}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="text-gray-400 hover:text-white px-5 py-2 rounded-lg text-sm transition-colors"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#555",
+                fontSize: "12px",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
             >
               Cancelar
             </button>
@@ -282,117 +564,297 @@ export function MonitorsPage() {
         </form>
       )}
 
-      <div className="bg-[#111827] rounded-xl border border-white/10">
+      <div
+        className="mon-fade"
+        style={{
+          background: "#0D1117",
+          border: "1px solid rgba(255,255,255,0.06)",
+          borderRadius: "12px",
+          overflow: "hidden",
+        }}
+      >
+        {monitors.length > 0 && (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 110px 90px 90px 300px",
+              alignItems: "center",
+              padding: "10px 20px",
+              borderBottom: "1px solid rgba(255,255,255,0.04)",
+            }}
+          >
+            {["Monitor", "Status", "Latência", "Uptime", "Ações"].map((col) => (
+              <span
+                key={col}
+                style={{
+                  fontSize: "10px",
+                  color: "#333",
+                  letterSpacing: "1.5px",
+                  textTransform: "uppercase",
+                }}
+              >
+                {col}
+              </span>
+            ))}
+          </div>
+        )}
+
         {monitors.length === 0 ? (
-          <div className="p-12 text-center">
-            <p className="text-gray-500 text-sm">Nenhum monitor ainda.</p>
+          <div style={{ padding: "56px", textAlign: "center" }}>
+            <div
+              style={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "12px",
+                background: "rgba(0,212,170,0.06)",
+                border: "1px solid rgba(0,212,170,0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 16px",
+              }}
+            >
+              <Activity size={20} color="#00D4AA" />
+            </div>
+            <p style={{ color: "#555", fontSize: "13px", margin: "0 0 12px" }}>
+              Nenhum monitor ainda.
+            </p>
             <button
               onClick={() => setShowForm(true)}
-              className="text-[#00D4AA] text-sm hover:underline mt-2 inline-block"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#00D4AA",
+                fontSize: "13px",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 600,
+              }}
             >
               Criar primeiro monitor →
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-white/5">
-            {monitors.map((monitor) => (
+          monitors.map((monitor, i) => (
+            <div
+              key={monitor.id}
+              className="monitor-card"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 110px 90px 90px 300px",
+                alignItems: "center",
+                padding: "14px 20px",
+                borderBottom:
+                  i < monitors.length - 1
+                    ? "1px solid rgba(255,255,255,0.04)"
+                    : "none",
+                opacity: monitor.is_active ? 1 : 0.5,
+              }}
+            >
               <div
-                key={monitor.id}
-                className="flex items-center justify-between p-5"
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
+                <div
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    background:
                       monitor.status === "up"
-                        ? "bg-green-400"
+                        ? "#22C55E"
                         : monitor.status === "down"
-                          ? "bg-red-400"
-                          : "bg-yellow-400"
-                    }`}
-                  />
-                  <div>
-                    <p className="text-white text-sm font-medium">
-                      {monitor.name}
+                          ? "#EF4444"
+                          : "#F59E0B",
+                  }}
+                />
+                <div>
+                  <p
+                    style={{
+                      color: "#F0F6FC",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      margin: 0,
+                    }}
+                  >
+                    {monitor.name}
+                  </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      marginTop: "2px",
+                    }}
+                  >
+                    <p style={{ color: "#333", fontSize: "11px", margin: 0 }}>
+                      {monitor.url}
                     </p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <p className="text-gray-500 text-xs">{monitor.url}</p>
-                      <a
-                        href={monitor.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-gray-600 hover:text-gray-400 transition-colors"
-                      >
-                        <ExternalLink size={10} />
-                      </a>
-                    </div>
+                    <a
+                      href={monitor.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: "#444", display: "flex" }}
+                    >
+                      <ExternalLink size={9} />
+                    </a>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-6">
-                  {monitor.last_ping && (
-                    <div className="flex items-center gap-1 text-gray-500 text-xs">
-                      <Clock size={12} />
-                      {monitor.last_ping.latency_ms}ms
-                    </div>
-                  )}
-                  {monitor.uptime_7d && (
-                    <div className="text-xs text-right">
-                      <span className="text-gray-500">uptime 7d </span>
-                      <span className="text-white font-medium">
-                        {monitor.uptime_7d}%
-                      </span>
-                    </div>
-                  )}
-                  <span
-                    className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      monitor.status === "up"
-                        ? "bg-green-400/10 text-green-400"
-                        : monitor.status === "down"
-                          ? "bg-red-400/10 text-red-400"
-                          : "bg-yellow-400/10 text-yellow-400"
-                    }`}
-                  >
-                    {monitor.status === "up"
-                      ? "Online"
-                      : monitor.status === "down"
-                        ? "Offline"
-                        : "Pendente"}
-                  </span>
-                  <button
-                    onClick={() => handlePingNow(monitor.id)}
-                    disabled={pinging === monitor.id}
-                    className="text-xs text-gray-500 hover:text-[#00D4AA] transition-colors disabled:opacity-50"
-                  >
-                    {pinging === monitor.id ? "Verificando..." : "Testar agora"}
-                  </button>
-                  <button
-                    onClick={() => handleToggle(monitor.id, monitor.is_active)}
-                    className={`text-xs transition-colors ${
-                      monitor.is_active
-                        ? "text-gray-500 hover:text-yellow-400"
-                        : "text-yellow-400 hover:text-yellow-300"
-                    }`}
-                  >
-                    {monitor.is_active ? "Pausar" : "Reativar"}
-                  </button>
-                  <button
-                    onClick={() => navigate(`/monitors/${monitor.id}`)}
-                    className="text-gray-500 hover:text-[#00D4AA] text-xs transition-colors"
-                  >
-                    Ver detalhes
-                  </button>
-                  <button
-                    onClick={() => handleDelete(monitor.id)}
-                    className="text-gray-600 hover:text-red-400 transition-colors"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
               </div>
-            ))}
-          </div>
+
+              <StatusBadge status={monitor.status} />
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  color: "#555",
+                  fontSize: "12px",
+                }}
+              >
+                <Clock size={10} />
+                {monitor.last_ping ? `${monitor.last_ping.latency_ms}ms` : "—"}
+              </div>
+
+              <div style={{ fontSize: "12px" }}>
+                {monitor.uptime_7d ? (
+                  <span
+                    style={{
+                      color:
+                        parseFloat(monitor.uptime_7d) >= 99
+                          ? "#00D4AA"
+                          : parseFloat(monitor.uptime_7d) >= 95
+                            ? "#F59E0B"
+                            : "#EF4444",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {monitor.uptime_7d}%
+                  </span>
+                ) : (
+                  <span style={{ color: "#333" }}>—</span>
+                )}
+              </div>
+
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
+              >
+                <button
+                  className="icon-btn"
+                  onClick={() => handlePingNow(monitor.id)}
+                  disabled={pinging === monitor.id}
+                  style={{
+                    color: "#555",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderRadius: "6px",
+                    padding: "5px 10px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = "#00D4AA";
+                    e.currentTarget.style.borderColor = "rgba(0,212,170,0.2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "#555";
+                    e.currentTarget.style.borderColor =
+                      "rgba(255,255,255,0.06)";
+                  }}
+                >
+                  <Zap size={11} />
+                  {pinging === monitor.id ? "..." : "Testar"}
+                </button>
+
+                <button
+                  className="icon-btn"
+                  onClick={() => handleToggle(monitor.id, monitor.is_active)}
+                  style={{
+                    color: monitor.is_active ? "#555" : "#F59E0B",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderRadius: "6px",
+                    padding: "5px 10px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = monitor.is_active
+                      ? "#F59E0B"
+                      : "#22C55E";
+                    e.currentTarget.style.borderColor = "rgba(245,158,11,0.2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = monitor.is_active
+                      ? "#555"
+                      : "#F59E0B";
+                    e.currentTarget.style.borderColor =
+                      "rgba(255,255,255,0.06)";
+                  }}
+                >
+                  {monitor.is_active ? <Pause size={11} /> : <Play size={11} />}
+                  {monitor.is_active ? "Pausar" : "Reativar"}
+                </button>
+
+                <button
+                  className="icon-btn"
+                  onClick={() => navigate(`/monitors/${monitor.id}`)}
+                  style={{
+                    color: "#555",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderRadius: "6px",
+                    padding: "5px 10px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = "#F0F6FC";
+                    e.currentTarget.style.borderColor =
+                      "rgba(255,255,255,0.12)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "#555";
+                    e.currentTarget.style.borderColor =
+                      "rgba(255,255,255,0.06)";
+                  }}
+                >
+                  Detalhes
+                </button>
+
+                <div
+                  style={{
+                    width: "1px",
+                    height: "20px",
+                    background: "rgba(255,255,255,0.06)",
+                    margin: "0 2px",
+                  }}
+                />
+
+                <button
+                  className="icon-btn"
+                  onClick={() => handleDelete(monitor.id)}
+                  style={{
+                    color: "#333",
+                    background: "none",
+                    border: "1px solid transparent",
+                    borderRadius: "6px",
+                    padding: "5px 8px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = "#EF4444";
+                    e.currentTarget.style.borderColor = "rgba(239,68,68,0.2)";
+                    e.currentTarget.style.background = "rgba(239,68,68,0.06)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "#333";
+                    e.currentTarget.style.borderColor = "transparent";
+                    e.currentTarget.style.background = "none";
+                  }}
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+          ))
         )}
       </div>
+
       {showUpgradeModal && (
         <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
       )}
