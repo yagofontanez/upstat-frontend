@@ -216,7 +216,7 @@
   },
   "billing": {
     "free_features": {
-      "three": "3 monitors",
+      "three": "10 monitors",
       "ping": "5-minute ping interval",
       "history": "7-day history",
       "url": "Random URL",
@@ -245,7 +245,7 @@
     "month": "/mo",
     "is_pro": "Current plan",
     "recommended": "Recommended",
-    "pro_price": "$5.50",
+    "pro_price": "$1.70",
     "cpf_or_cnpj": "CPF or CNPJ",
     "loading": "Processing...",
     "do": "Upgrade now →",
