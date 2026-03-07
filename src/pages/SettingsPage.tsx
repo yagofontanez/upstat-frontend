@@ -8,6 +8,7 @@ import {
   unsubscribePush,
   isPushSubscribed,
 } from "../services/push";
+import { useTranslation } from "react-i18next";
 
 function Toggle({
   enabled,
@@ -86,6 +87,7 @@ function Section({
 }
 
 export function SettingsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [emailEnabled, setEmailEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -211,7 +213,7 @@ export function SettingsPage() {
       setPageSuccess(true);
       setTimeout(() => setPageSuccess(false), 3000);
     } catch {
-      setPageError("Erro ao salvar");
+      setPageError(t("settings.error"));
     } finally {
       setSavingPage(false);
     }
@@ -304,15 +306,18 @@ export function SettingsPage() {
             margin: "0 0 4px",
           }}
         >
-          Configurações
+          {t("settings.config")}
         </h2>
         <p style={{ color: "#bbbbbb", fontSize: "12px", margin: 0 }}>
-          Gerencie sua conta e notificações
+          {t("settings.desc")}
         </p>
       </div>
 
       <div className="set-fade-1">
-        <Section title="Conta" icon={<User size={14} />}>
+        <Section
+          title={t("settings.sections.account")}
+          icon={<User size={14} />}
+        >
           <div
             style={{
               display: "grid",
@@ -322,7 +327,7 @@ export function SettingsPage() {
             }}
           >
             <div>
-              <label style={labelStyle}>Nome</label>
+              <label style={labelStyle}>{t("settings.name")}</label>
               <input
                 type="text"
                 value={user?.name}
@@ -367,7 +372,7 @@ export function SettingsPage() {
             </span>
             {user?.plan === "free" && (
               <span style={{ fontSize: "11px", color: "#bbbbbb" }}>
-                Faça upgrade para desbloquear mais recursos.
+                {t("settings.do_upgrade")}
               </span>
             )}
           </div>
@@ -375,18 +380,21 @@ export function SettingsPage() {
       </div>
 
       <div className="set-fade-2">
-        <Section title="Notificações" icon={<Bell size={14} />}>
+        <Section
+          title={t("settings.sections.notifications")}
+          icon={<Bell size={14} />}
+        >
           {[
             {
               label: "Email",
-              desc: "Alertas de downtime por email",
+              desc: t("settings.mail_alert"),
               enabled: emailEnabled,
               onChange: () => setEmailEnabled(!emailEnabled),
               disabled: false,
             },
             {
-              label: "Notificações no browser",
-              desc: "Alertas mesmo com a aba fechada",
+              label: t("settings.push_alert"),
+              desc: t("settings.push_alert_desc"),
               enabled: pushEnabled,
               onChange: handleTogglePush,
               disabled: pushLoading,
@@ -444,11 +452,11 @@ export function SettingsPage() {
               disabled={saving}
               style={{ ...saveBtn, opacity: saving ? 0.5 : 1 }}
             >
-              {saving ? "Salvando..." : "Salvar"}
+              {saving ? t("settings.saving") : t("settings.save")}
             </button>
             {success && (
               <span style={{ fontSize: "12px", color: "#22C55E" }}>
-                ✓ Salvo
+                {t("settings.saved")}
               </span>
             )}
           </div>
@@ -457,7 +465,7 @@ export function SettingsPage() {
 
       {user?.plan === "pro" && (
         <div className="set-fade-3">
-          <Section title="WhatsApp" icon={<Bell size={14} />}>
+          <Section title={t("settings.sections.wpp")} icon={<Bell size={14} />}>
             <p
               style={{
                 color: "#bbbbbb",
@@ -466,10 +474,10 @@ export function SettingsPage() {
                 lineHeight: 1.6,
               }}
             >
-              Receba alertas de downtime direto no seu WhatsApp.
+              {t("settings.wpp_alert")}
             </p>
             <div style={{ marginBottom: "14px" }}>
-              <label style={labelStyle}>Número (formato E.164)</label>
+              <label style={labelStyle}>{t("settings.number")}</label>
               <input
                 type="text"
                 value={whatsappNumber}
@@ -496,10 +504,10 @@ export function SettingsPage() {
                     margin: "0 0 2px",
                   }}
                 >
-                  Ativar notificações
+                  {t("settings.activate")}
                 </p>
                 <p style={{ color: "#bbbbbb", fontSize: "11px", margin: 0 }}>
-                  Enviar alerta quando monitor cair ou recuperar
+                  {t("settings.send_alert")}
                 </p>
               </div>
               <Toggle
@@ -513,11 +521,11 @@ export function SettingsPage() {
                 disabled={savingWhatsapp}
                 style={{ ...saveBtn, opacity: savingWhatsapp ? 0.5 : 1 }}
               >
-                {savingWhatsapp ? "Salvando..." : "Salvar"}
+                {savingWhatsapp ? t("settings.saving") : t("settings.save")}
               </button>
               {whatsappSuccess && (
                 <span style={{ fontSize: "12px", color: "#22C55E" }}>
-                  ✓ Salvo
+                  {t("settings.saved")}
                 </span>
               )}
             </div>
@@ -526,7 +534,7 @@ export function SettingsPage() {
       )}
 
       <div className="set-fade-3">
-        <Section title="Slack" icon={<Bell size={14} />}>
+        <Section title={t("settings.sections.slack")} icon={<Bell size={14} />}>
           <p
             style={{
               color: "#bbbbbb",
@@ -535,14 +543,14 @@ export function SettingsPage() {
               lineHeight: 1.6,
             }}
           >
-            Receba alertas de downtime direto no seu canal do Slack.{" "}
+            {t("settings.slack_desc")}{" "}
             <a
               href="https://api.slack.com/messaging/webhooks"
               target="_blank"
               rel="noreferrer"
               style={{ color: "#00D4AA" }}
             >
-              Como criar um webhook →
+              {t("settings.how_create_webhook")}
             </a>
           </p>
 
@@ -575,10 +583,10 @@ export function SettingsPage() {
                   margin: "0 0 2px",
                 }}
               >
-                Ativar notificações
+                {t("settings.activate")}
               </p>
               <p style={{ color: "#bbbbbb", fontSize: "11px", margin: 0 }}>
-                Enviar alerta quando monitor cair ou recuperar
+                {t("settings.send_alert")}
               </p>
             </div>
             <Toggle
@@ -593,11 +601,11 @@ export function SettingsPage() {
               disabled={savingSlack}
               style={{ ...saveBtn, opacity: savingSlack ? 0.5 : 1 }}
             >
-              {savingSlack ? "Salvando..." : "Salvar"}
+              {savingSlack ? t("settings.saving") : t("settings.save")}
             </button>
             {slackSuccess && (
               <span style={{ fontSize: "12px", color: "#22C55E" }}>
-                ✓ Salvo
+                {t("settings.saved")}
               </span>
             )}
           </div>
@@ -605,7 +613,10 @@ export function SettingsPage() {
       </div>
 
       <div className="set-fade-4">
-        <Section title="Badge para README" icon={<Code size={14} />}>
+        <Section
+          title={t("settings.sections.readme")}
+          icon={<Code size={14} />}
+        >
           <p
             style={{
               color: "#bbbbbb",
@@ -614,8 +625,7 @@ export function SettingsPage() {
               lineHeight: 1.6,
             }}
           >
-            Cole no README do seu projeto no GitHub para mostrar o status em
-            tempo real.
+            {t("settings.readme_desc")}
           </p>
           <div
             style={{
@@ -675,7 +685,10 @@ export function SettingsPage() {
       </div>
 
       <div className="set-fade-5">
-        <Section title="Widget para seu site" icon={<Code size={14} />}>
+        <Section
+          title={t("settings.sections.widget")}
+          icon={<Code size={14} />}
+        >
           <p
             style={{
               color: "#bbbbbb",
@@ -684,8 +697,7 @@ export function SettingsPage() {
               lineHeight: 1.6,
             }}
           >
-            Cole no seu site para mostrar o status em tempo real no canto da
-            tela.
+            {t("settings.widget_desc")}
           </p>
           <div
             style={{
@@ -760,7 +772,7 @@ export function SettingsPage() {
                 opacity: 0.8,
               }}
             >
-              Ver página <ExternalLink size={11} />
+              {t("settings.see_page")} <ExternalLink size={11} />
             </a>
           </div>
 
@@ -790,14 +802,14 @@ export function SettingsPage() {
               }}
             >
               <div>
-                <label style={labelStyle}>Título</label>
+                <label style={labelStyle}>{t("settings.title")}</label>
                 <input
                   type="text"
                   value={pageTitle}
                   onChange={(e) => setPageTitle(e.target.value)}
                   style={inputStyle}
                   className="input-focus"
-                  placeholder="Minha Status Page"
+                  placeholder={t("settings.title_placeholder")}
                 />
               </div>
               <div>
@@ -820,7 +832,7 @@ export function SettingsPage() {
                         fontWeight: 600,
                       }}
                     >
-                      somente Pro
+                      {t("settings.only_pro")}
                     </span>
                   )}
                 </label>
@@ -859,31 +871,31 @@ export function SettingsPage() {
                       fontFamily: "'JetBrains Mono', monospace",
                       cursor: user?.plan !== "pro" ? "not-allowed" : "text",
                     }}
-                    placeholder="meu-slug"
+                    placeholder={t("settings.my_slug")}
                   />
                 </div>
               </div>
             </div>
 
             <div style={{ marginBottom: "14px" }}>
-              <label style={labelStyle}>Descrição</label>
+              <label style={labelStyle}>{t("settings.description")}</label>
               <input
                 type="text"
                 value={pageDescription}
                 onChange={(e) => setPageDescription(e.target.value)}
                 style={inputStyle}
                 className="input-focus"
-                placeholder="Acompanhe o status dos nossos serviços."
+                placeholder={t("settings.description_placeholder")}
               />
             </div>
 
             <div style={{ marginBottom: "20px" }}>
               <label style={{ ...labelStyle, marginBottom: "10px" }}>
-                Monitores exibidos
+                {t("settings.monitors")}
               </label>
               {monitors.length === 0 ? (
                 <p style={{ color: "#bbbbbb", fontSize: "12px" }}>
-                  Nenhum monitor cadastrado ainda.
+                  {t("settings.0_monitors")}
                 </p>
               ) : (
                 <div
@@ -943,11 +955,11 @@ export function SettingsPage() {
                 disabled={savingPage}
                 style={{ ...saveBtn, opacity: savingPage ? 0.5 : 1 }}
               >
-                {savingPage ? "Salvando..." : "Salvar"}
+                {savingPage ? t("settings.saving") : t("settings.save")}
               </button>
               {pageSuccess && (
                 <span style={{ fontSize: "12px", color: "#22C55E" }}>
-                  ✓ Salvo
+                  {t("settings.saved")}
                 </span>
               )}
             </div>

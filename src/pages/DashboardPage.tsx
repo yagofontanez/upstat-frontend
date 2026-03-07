@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getMyPage } from "../services/pages";
 import { OnboardingModal } from "../components/OnboardingModal";
+import { useTranslation } from "react-i18next";
 
 function UptimeIndicator({ uptime }: { uptime: string | null }) {
   if (!uptime) return <span style={{ color: "#555" }}>—</span>;
@@ -21,21 +22,23 @@ function UptimeIndicator({ uptime }: { uptime: string | null }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
+
   const config = {
     up: {
-      label: "Online",
+      label: t("dashboard.status.online"),
       bg: "rgba(34,197,94,0.08)",
       border: "rgba(34,197,94,0.2)",
       color: "#22C55E",
     },
     down: {
-      label: "Offline",
+      label: t("dashboard.status.off"),
       bg: "rgba(239,68,68,0.08)",
       border: "rgba(239,68,68,0.2)",
       color: "#EF4444",
     },
     pending: {
-      label: "Verificando",
+      label: t("dashboard.status.verifying"),
       bg: "rgba(245,158,11,0.08)",
       border: "rgba(245,158,11,0.2)",
       color: "#F59E0B",
@@ -80,6 +83,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const { user, refreshUser } = useAuth();
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -185,7 +189,7 @@ export function DashboardPage() {
               margin: 0,
             }}
           >
-            Dashboard
+            {t("dashboard.dash")}
           </h2>
           <div
             style={{
@@ -209,11 +213,11 @@ export function DashboardPage() {
                 animation: "pulse-live 2s infinite",
               }}
             />
-            ao vivo
+            {t("dashboard.live")}
           </div>
         </div>
         <p style={{ color: "#bbbbbb", fontSize: "12px", margin: 0 }}>
-          Atualiza automaticamente a cada 60 segundos
+          {t("dashboard.att")}
         </p>
       </div>
 
@@ -249,8 +253,8 @@ export function DashboardPage() {
             }}
           >
             {allUp
-              ? "✓ Todos os sistemas operacionais"
-              : `⚠ ${down} sistema${down > 1 ? "s" : ""} fora do ar`}
+              ? t("dashboard.all_ok")
+              : `⚠ ${down} ${t("dashboard.some_off")}${down > 1 ? "s" : ""} ${t("dashboard.some_off_2")}`}
           </span>
         </div>
       )}
@@ -347,7 +351,7 @@ export function DashboardPage() {
           }}
         >
           <span style={{ fontSize: "13px", fontWeight: 600, color: "#F0F6FC" }}>
-            Monitores
+            {t("dashboard.monitors")}
           </span>
           <Link
             to="/monitors"
@@ -361,13 +365,18 @@ export function DashboardPage() {
               opacity: 0.8,
             }}
           >
-            Gerenciar <ExternalLink size={10} />
+            {t("dashboard.gerency")} <ExternalLink size={10} />
           </Link>
         </div>
 
         {monitors.length > 0 && (
           <div className="monitor-col-header">
-            {["Monitor", "Status", "Latência", "Uptime 7d"].map((col) => (
+            {[
+              t("dashboard.monitor"),
+              t("dashboard.stat"),
+              t("dashboard.latency"),
+              t("dashboard.uptime"),
+            ].map((col) => (
               <span
                 key={col}
                 style={{
@@ -403,7 +412,7 @@ export function DashboardPage() {
             <p
               style={{ color: "#bbbbbb", fontSize: "13px", margin: "0 0 12px" }}
             >
-              Nenhum monitor ainda.
+              {t("dashboard.0_monitors")}
             </p>
             <Link
               to="/monitors"
@@ -414,7 +423,7 @@ export function DashboardPage() {
                 fontWeight: 600,
               }}
             >
-              Criar primeiro monitor →
+              {t("dashboard.create_first")}
             </Link>
           </div>
         ) : (
@@ -622,7 +631,7 @@ export function DashboardPage() {
                         gap: "4px",
                       }}
                     >
-                      Ver detalhes <ExternalLink size={10} />
+                      {t("dashboard.details")} <ExternalLink size={10} />
                     </Link>
                   </div>
                 </div>

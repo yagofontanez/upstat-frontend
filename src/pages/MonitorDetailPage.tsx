@@ -27,6 +27,7 @@ import {
 } from "../services/monitorDetails";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
+import { useTranslation } from "react-i18next";
 
 function formatDuration(ms: number) {
   const minutes = Math.floor(ms / 60000);
@@ -34,16 +35,6 @@ function formatDuration(ms: number) {
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ${minutes % 60}min`;
   return `${Math.floor(hours / 24)}d ${hours % 24}h`;
-}
-
-function timeAgo(date: string) {
-  const diff = Date.now() - new Date(date).getTime();
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "agora";
-  if (minutes < 60) return `${minutes}min atrás`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h atrás`;
-  return `${Math.floor(hours / 24)}d atrás`;
 }
 
 function buildHeatmap(pings: Ping[]) {
@@ -78,6 +69,7 @@ function buildLatencyChart(pings: Ping[]) {
 
 export function MonitorDetailPage() {
   const { id } = useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [monitor, setMonitor] = useState<Monitor | null>(null);
@@ -86,6 +78,17 @@ export function MonitorDetailPage() {
   const [uptimePercent, setUptimePercent] = useState<string | null>(null);
   const [avgLatency, setAvgLatency] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+
+  function timeAgo(date: string) {
+    const diff = Date.now() - new Date(date).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return t("monitor_details.time_ago.now");
+    if (minutes < 60)
+      return `${minutes}${t("monitor_details.time_ago.min_ago")}`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}${t("monitor_details.time_ago.hour_ago")}`;
+    return `${Math.floor(hours / 24)}${t("monitor_details.time_ago.days_ago")}`;
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -158,7 +161,7 @@ export function MonitorDetailPage() {
       ? "Online"
       : monitor.status === "down"
         ? "Offline"
-        : "Pendente";
+        : t("monitor_details.pending");
 
   const statCards = [
     {
@@ -190,7 +193,7 @@ export function MonitorDetailPage() {
       icon: <Activity size={12} color="#555" />,
     },
     {
-      label: "Latência",
+      label: t("monitor_details.latency"),
       value: avgLatency ? `${avgLatency}ms` : "—",
       color: "#F0F6FC",
       icon: <Clock size={12} color="#555" />,
@@ -218,7 +221,7 @@ export function MonitorDetailPage() {
           ? "—"
           : monitor.dns_valid
             ? "OK"
-            : "Falhou",
+            : t("monitor_details.failed"),
       color:
         monitor.dns_valid === null || monitor.dns_valid === undefined
           ? "#555"
@@ -285,7 +288,7 @@ export function MonitorDetailPage() {
         }}
       >
         <ArrowLeft size={14} />
-        Voltar
+        {t("monitor_details.back")}
       </button>
 
       <div className="det-fade det-header" style={{ marginBottom: "24px" }}>
@@ -360,7 +363,7 @@ export function MonitorDetailPage() {
             }}
           >
             <Download size={13} />
-            Exportar CSV
+            {t("monitor_details.export")}
           </button>
         ) : (
           <button
@@ -381,7 +384,7 @@ export function MonitorDetailPage() {
             }}
           >
             <Download size={13} />
-            Exportar CSV
+            {t("monitor_details.export")}
             <span
               style={{
                 fontSize: "10px",
@@ -465,7 +468,7 @@ export function MonitorDetailPage() {
           }}
         >
           <span style={{ fontSize: "13px", fontWeight: 600, color: "#F0F6FC" }}>
-            Uptime por dia
+            {t("monitor_details.uptime_per_day")}
           </span>
           <div
             style={{
@@ -499,7 +502,9 @@ export function MonitorDetailPage() {
           </div>
         </div>
         {heatmap.length === 0 ? (
-          <p style={{ color: "#555", fontSize: "12px" }}>Sem dados ainda.</p>
+          <p style={{ color: "#555", fontSize: "12px" }}>
+            {t("monitor_details.without_data")}
+          </p>
         ) : (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
             {heatmap.map(({ day, uptime }) => (
@@ -557,7 +562,7 @@ export function MonitorDetailPage() {
           }}
         >
           <span style={{ fontSize: "13px", fontWeight: 600, color: "#F0F6FC" }}>
-            Latência ao longo do tempo
+            {t("monitor_details.latency_period")}
           </span>
           {user?.plan !== "pro" && (
             <span
@@ -595,7 +600,7 @@ export function MonitorDetailPage() {
                 style={{ margin: "0 auto 8px" }}
               />
               <p style={{ color: "#555", fontSize: "12px", margin: 0 }}>
-                Disponível no plano Pro
+                {t("monitor_details.on_pro_plan")}
               </p>
               <p
                 style={{
@@ -604,12 +609,14 @@ export function MonitorDetailPage() {
                   margin: "4px 0 0",
                 }}
               >
-                Fazer upgrade →
+                {t("monitor_details.upgrade")}
               </p>
             </div>
           </div>
         ) : latencyChart.length === 0 ? (
-          <p style={{ color: "#555", fontSize: "12px" }}>Sem dados ainda.</p>
+          <p style={{ color: "#555", fontSize: "12px" }}>
+            {t("monitor_details.without_data")}
+          </p>
         ) : (
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={latencyChart}>
@@ -676,7 +683,7 @@ export function MonitorDetailPage() {
           }}
         >
           <span style={{ fontSize: "13px", fontWeight: 600, color: "#F0F6FC" }}>
-            Histórico de incidentes
+            {t("monitor_details.history")}
           </span>
           <span style={{ fontSize: "11px", color: "#555" }}>
             {incidents.length} total
@@ -701,7 +708,7 @@ export function MonitorDetailPage() {
               <span style={{ fontSize: "18px" }}>🎉</span>
             </div>
             <p style={{ color: "#555", fontSize: "13px", margin: 0 }}>
-              Nenhum incidente registrado.
+              {t("monitor_details.0_incidents")}
             </p>
           </div>
         ) : (
@@ -755,7 +762,9 @@ export function MonitorDetailPage() {
                         fontWeight: 600,
                       }}
                     >
-                      {incident.resolved_at ? "Resolvido" : "Em andamento"}
+                      {incident.resolved_at
+                        ? t("monitor_details.resolved")
+                        : t("monitor_details.in_progress")}
                     </span>
                     <p
                       style={{
@@ -764,7 +773,7 @@ export function MonitorDetailPage() {
                         margin: "2px 0 0",
                       }}
                     >
-                      Iniciou {timeAgo(incident.started_at)}
+                      {t("monitor_details.init")} {timeAgo(incident.started_at)}
                     </p>
                   </div>
                 </div>

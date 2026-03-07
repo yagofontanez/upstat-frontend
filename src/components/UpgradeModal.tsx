@@ -1,21 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface UpgradeModalProps {
   onClose: () => void;
 }
 
-const PRO_FEATURES = [
-  "Monitores ilimitados",
-  "Ping a cada 1 minuto",
-  "Histórico de 90 dias",
-  "URL personalizada",
-  "Notificação por WhatsApp",
-  "Relatório semanal",
-];
-
 export function UpgradeModal({ onClose }: UpgradeModalProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const PRO_FEATURES = [
+    t("upgrade_modal.features.monitors"),
+    t("upgrade_modal.features.ping"),
+    t("upgrade_modal.features.feed"),
+    t("upgrade_modal.features.url"),
+    t("upgrade_modal.features.notification"),
+    t("upgrade_modal.features.relatory"),
+  ];
 
   return (
     <div
@@ -97,7 +99,7 @@ export function UpgradeModal({ onClose }: UpgradeModalProps) {
               margin: "0 0 8px",
             }}
           >
-            Limite atingido
+            {t("upgrade_modal.limit")}
           </h3>
           <p
             style={{
@@ -107,11 +109,11 @@ export function UpgradeModal({ onClose }: UpgradeModalProps) {
               margin: 0,
             }}
           >
-            Você atingiu o limite de{" "}
+            {t("upgrade_modal.limit_rate")}{" "}
             <span style={{ color: "#F0F6FC", fontWeight: 600 }}>
-              3 monitores
+              {t("upgrade_modal.three")}
             </span>{" "}
-            do plano Free. Faça upgrade e monitore quantos sistemas quiser.
+            {t("upgrade_modal.free")}
           </p>
         </div>
 
@@ -157,9 +159,11 @@ export function UpgradeModal({ onClose }: UpgradeModalProps) {
                   letterSpacing: "-0.5px",
                 }}
               >
-                R$29
+                {t("upgrade_modal.value")}
               </span>
-              <span style={{ color: "#555", fontSize: "11px" }}>/mês</span>
+              <span style={{ color: "#555", fontSize: "11px" }}>
+                {t("upgrade_modal.month")}
+              </span>
             </div>
           </div>
 
@@ -216,7 +220,7 @@ export function UpgradeModal({ onClose }: UpgradeModalProps) {
               fontFamily: "'JetBrains Mono', monospace",
             }}
           >
-            Agora não
+            {t("upgrade_modal.not_now")}
           </button>
           <button
             onClick={() => navigate("/billing")}
@@ -238,7 +242,7 @@ export function UpgradeModal({ onClose }: UpgradeModalProps) {
               gap: "6px",
             }}
           >
-            <Zap size={13} /> Fazer upgrade
+            <Zap size={13} /> {t("upgrade_modal.upgrade")}
           </button>
         </div>
       </div>

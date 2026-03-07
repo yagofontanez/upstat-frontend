@@ -2,33 +2,35 @@ import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
 import { CheckCircle, Zap, Lock } from "lucide-react";
-
-const FREE_FEATURES = [
-  "3 monitores",
-  "Ping a cada 5 minutos",
-  "Histórico de 7 dias",
-  "URL aleatória",
-  "Notificação por email",
-];
-
-const PRO_FEATURES = [
-  "Monitores ilimitados",
-  "Ping a cada 1 minuto",
-  "Histórico de 90 dias",
-  "URL personalizada",
-  "Notificação por email",
-  "Notificação por WhatsApp",
-  "Múltiplos serviços na page",
-  "Relatório semanal",
-  "Exportar histórico CSV",
-];
+import { useTranslation } from "react-i18next";
 
 export function BillingPage() {
   const { user, refreshUser } = useAuth();
+  const { t } = useTranslation();
   const [cpf, setCpf] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [paid, setPaid] = useState(false);
+
+  const FREE_FEATURES = [
+    t("billing.free_features.three"),
+    t("billing.free_features.ping"),
+    t("billing.free_features.history"),
+    t("billing.free_features.url"),
+    t("billing.free_features.notify"),
+  ];
+
+  const PRO_FEATURES = [
+    t("billing.pro_features.ilimited"),
+    t("billing.pro_features.ping"),
+    t("billing.pro_features.history"),
+    t("billing.pro_features.url"),
+    t("billing.pro_features.notify_email"),
+    t("billing.pro_features.notify_wpp"),
+    t("billing.pro_features.services"),
+    t("billing.pro_features.relatory"),
+    t("billing.pro_features.csv"),
+  ];
 
   async function handleUpgrade(e: React.FormEvent) {
     e.preventDefault();
@@ -41,7 +43,7 @@ export function BillingPage() {
       window.open(res.data.payment_url, "_blank");
       setPaid(true);
     } catch {
-      setError("Erro ao processar upgrade");
+      setError(t("billing.error"));
     } finally {
       setLoading(false);
     }
@@ -98,10 +100,10 @@ export function BillingPage() {
             margin: "0 0 4px",
           }}
         >
-          Plano
+          {t("billing.plan")}
         </h2>
         <p style={{ color: "#bbbbbb", fontSize: "12px", margin: 0 }}>
-          Gerencie sua assinatura
+          {t("billing.manage")}
         </p>
       </div>
 
@@ -128,7 +130,7 @@ export function BillingPage() {
             <span
               style={{ fontSize: "13px", color: "#F0F6FC", fontWeight: 600 }}
             >
-              Você está no plano {isPro ? "Pro" : "Free"}
+              {t("billing.you_are_in")} {isPro ? "Pro" : "Free"}
             </span>
             <p
               style={{
@@ -137,9 +139,7 @@ export function BillingPage() {
                 margin: "2px 0 0",
               }}
             >
-              {isPro
-                ? "Todos os recursos desbloqueados"
-                : "Faça upgrade para desbloquear todos os recursos"}
+              {isPro ? t("billing.all_unlocked") : t("billing.do_upgrade")}
             </p>
           </div>
         </div>
@@ -156,7 +156,7 @@ export function BillingPage() {
             fontWeight: 600,
           }}
         >
-          {isPro ? "● Ativo" : "Free"}
+          {isPro ? t("billing.active") : "Free"}
         </span>
       </div>
 
@@ -200,7 +200,7 @@ export function BillingPage() {
                   fontWeight: 600,
                 }}
               >
-                Plano atual
+                {t("billing.current_plan")}
               </span>
             )}
           </div>
@@ -220,9 +220,11 @@ export function BillingPage() {
                 letterSpacing: "-2px",
               }}
             >
-              R$0
+              {t("billing.free_price")}
             </span>
-            <span style={{ fontSize: "13px", color: "#bbbbbb" }}>/mês</span>
+            <span style={{ fontSize: "13px", color: "#bbbbbb" }}>
+              {t("billing.month")}
+            </span>
           </div>
           <div
             style={{
@@ -316,7 +318,7 @@ export function BillingPage() {
                 fontWeight: 600,
               }}
             >
-              {isPro ? "Plano atual" : "Recomendado"}
+              {isPro ? t("billing.is_pro") : t("billing.recommended")}
             </span>
           </div>
 
@@ -336,9 +338,11 @@ export function BillingPage() {
                 letterSpacing: "-2px",
               }}
             >
-              R$29
+              {t("billing.pro_price")}
             </span>
-            <span style={{ fontSize: "13px", color: "#bbbbbb" }}>/mês</span>
+            <span style={{ fontSize: "13px", color: "#bbbbbb" }}>
+              {t("billing.month")}
+            </span>
           </div>
 
           <div
@@ -402,7 +406,7 @@ export function BillingPage() {
                       value={cpf}
                       onChange={(e) => setCpf(e.target.value)}
                       className="input-cpf"
-                      placeholder="CPF ou CNPJ"
+                      placeholder={t("billing.cpf_or_cnpj")}
                       required
                     />
                   </div>
@@ -424,7 +428,7 @@ export function BillingPage() {
                       transition: "background 0.2s",
                     }}
                   >
-                    {loading ? "Processando..." : "Fazer upgrade →"}
+                    {loading ? t("billing.loading") : t("billing.do")}
                   </button>
                   <p
                     style={{
@@ -434,7 +438,7 @@ export function BillingPage() {
                       margin: "10px 0 0",
                     }}
                   >
-                    Pagamento seguro via Asaas · Cancele quando quiser
+                    {t("billing.asaas")}
                   </p>
                 </>
               ) : (
@@ -447,8 +451,7 @@ export function BillingPage() {
                       lineHeight: 1.6,
                     }}
                   >
-                    Após concluir o pagamento, clique abaixo para atualizar seu
-                    plano.
+                    {t("billing.att")}
                   </p>
                   <button
                     type="button"
@@ -469,7 +472,7 @@ export function BillingPage() {
                       fontFamily: "'JetBrains Mono', monospace",
                     }}
                   >
-                    Já paguei, atualizar plano
+                    {t("billing.already_payed")}
                   </button>
                 </div>
               )}
@@ -487,7 +490,7 @@ export function BillingPage() {
               }}
             >
               <span style={{ fontSize: "12px", color: "#00D4AA" }}>
-                ✓ Plano ativo
+                {t("billing.active_plan")}
               </span>
             </div>
           )}

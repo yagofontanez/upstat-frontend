@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface DayData {
   day: string;
   total: number;
@@ -25,6 +27,8 @@ function formatDate(day: string) {
 }
 
 export function UptimeBar({ history, days = 90 }: UptimeBarProps) {
+  const { t } = useTranslation();
+
   const filledDays = Array.from({ length: days }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (days - 1 - i));
@@ -51,7 +55,9 @@ export function UptimeBar({ history, days = 90 }: UptimeBarProps) {
               <div className="bg-[#1f2937] border border-white/10 rounded-lg px-3 py-2 text-xs whitespace-nowrap shadow-xl">
                 <p className="text-gray-400 mb-0.5">{formatDate(day)}</p>
                 <p className="text-white font-medium">
-                  {uptime === -1 ? "Sem dados" : `${uptime}% uptime`}
+                  {uptime === -1
+                    ? t("uptime_bar.without")
+                    : `${uptime}% uptime`}
                 </p>
               </div>
               <div className="w-2 h-2 bg-[#1f2937] border-r border-b border-white/10 rotate-45 mx-auto -mt-1" />
@@ -60,8 +66,10 @@ export function UptimeBar({ history, days = 90 }: UptimeBarProps) {
         ))}
       </div>
       <div className="flex justify-between mt-1.5">
-        <span className="text-gray-600 text-xs">90 dias atrás</span>
-        <span className="text-gray-600 text-xs">hoje</span>
+        <span className="text-gray-600 text-xs">
+          {t("uptime_bar.days_ago")}
+        </span>
+        <span className="text-gray-600 text-xs">{t("uptime_bar.today")}</span>
       </div>
     </div>
   );

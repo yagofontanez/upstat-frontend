@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "../services/api";
 import { createMonitor } from "../services/monitors";
 import { ArrowRight, CheckCircle, Copy, ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface OnboardingModalProps {
   userName: string;
@@ -14,6 +15,8 @@ export function OnboardingModal({
   statusSlug,
   onComplete,
 }: OnboardingModalProps) {
+  const { t } = useTranslation();
+
   const [step, setStep] = useState(1);
   const [monitorName, setMonitorName] = useState("");
   const [monitorUrl, setMonitorUrl] = useState("");
@@ -31,7 +34,7 @@ export function OnboardingModal({
       await createMonitor({ name: monitorName, url: monitorUrl });
       setStep(3);
     } catch {
-      setError("Erro ao criar monitor. Verifique a URL e tente novamente.");
+      setError(t("onboarding_modal.error"));
     } finally {
       setCreating(false);
     }
@@ -181,7 +184,8 @@ export function OnboardingModal({
                     margin: "0 0 10px",
                   }}
                 >
-                  Olá, {userName.split(" ")[0]}!
+                  {t("onboarding_modal.hello")}
+                  {userName.split(" ")[0]}!
                 </h2>
                 <p
                   style={{
@@ -191,9 +195,7 @@ export function OnboardingModal({
                     margin: 0,
                   }}
                 >
-                  Bem-vindo ao UpStat. Em menos de 2 minutos você vai ter seu
-                  primeiro monitor configurado e uma status page pública pronta
-                  pra compartilhar.
+                  {t("onboarding_modal.welcome")}
                 </p>
               </div>
 
@@ -206,9 +208,9 @@ export function OnboardingModal({
                 }}
               >
                 {[
-                  { num: "01", label: "Criar seu primeiro monitor" },
-                  { num: "02", label: "Receber alertas de downtime" },
-                  { num: "03", label: "Compartilhar sua status page" },
+                  { num: "01", label: t("onboarding_modal.create") },
+                  { num: "02", label: t("onboarding_modal.receive") },
+                  { num: "03", label: t("onboarding_modal.share") },
                 ].map((item) => (
                   <div
                     key={item.num}
@@ -260,7 +262,7 @@ export function OnboardingModal({
                   gap: "8px",
                 }}
               >
-                Começar <ArrowRight size={14} />
+                {t("onboarding_modal.start")} <ArrowRight size={14} />
               </button>
             </div>
           )}
@@ -278,7 +280,7 @@ export function OnboardingModal({
                     opacity: 0.7,
                   }}
                 >
-                  // passo 1
+                  // {t("onboarding_modal.step_1")}
                 </div>
                 <h2
                   style={{
@@ -289,7 +291,7 @@ export function OnboardingModal({
                     margin: "0 0 8px",
                   }}
                 >
-                  Adicione seu primeiro monitor
+                  {t("onboarding_modal.add_monitor")}
                 </h2>
                 <p
                   style={{
@@ -299,8 +301,7 @@ export function OnboardingModal({
                     margin: 0,
                   }}
                 >
-                  Cole a URL de qualquer site, API ou serviço que você quer
-                  monitorar.
+                  {t("onboarding_modal.add_monitor_desc")}
                 </p>
               </div>
 
@@ -332,7 +333,7 @@ export function OnboardingModal({
                       textTransform: "uppercase",
                     }}
                   >
-                    Nome
+                    {t("onboarding_modal.name")}
                   </label>
                   <input
                     type="text"
@@ -340,7 +341,7 @@ export function OnboardingModal({
                     onChange={(e) => setMonitorName(e.target.value)}
                     style={inputStyle}
                     className="onb-input"
-                    placeholder="Minha API"
+                    placeholder={t("onboarding_modal.name_placeholder")}
                     required
                     autoFocus
                   />
@@ -357,7 +358,7 @@ export function OnboardingModal({
                       textTransform: "uppercase",
                     }}
                   >
-                    URL
+                    {t("onboarding_modal.url")}
                   </label>
                   <input
                     type="url"
@@ -365,7 +366,7 @@ export function OnboardingModal({
                     onChange={(e) => setMonitorUrl(e.target.value)}
                     style={inputStyle}
                     className="onb-input"
-                    placeholder="https://minha-api.com/health"
+                    placeholder={t("onboarding_modal.url_placeholder")}
                     required
                   />
                 </div>
@@ -394,10 +395,11 @@ export function OnboardingModal({
                     }}
                   >
                     {creating ? (
-                      "Criando..."
+                      t("onboarding_modal.creating")
                     ) : (
                       <>
-                        <ArrowRight size={13} /> Criar monitor
+                        <ArrowRight size={13} />{" "}
+                        {t("onboarding_modal.create_monitor")}
                       </>
                     )}
                   </button>
@@ -416,7 +418,7 @@ export function OnboardingModal({
                       fontFamily: "'JetBrains Mono', monospace",
                     }}
                   >
-                    Pular
+                    {t("onboarding_modal.skip")}
                   </button>
                 </div>
               </form>
@@ -451,7 +453,7 @@ export function OnboardingModal({
                     opacity: 0.7,
                   }}
                 >
-                  // tudo pronto
+                  {t("onboarding_modal.ready")}
                 </div>
                 <h2
                   style={{
@@ -462,7 +464,7 @@ export function OnboardingModal({
                     margin: "0 0 8px",
                   }}
                 >
-                  Monitor criado! 🎉
+                  {t("onboarding_modal.created")}
                 </h2>
                 <p
                   style={{
@@ -472,8 +474,7 @@ export function OnboardingModal({
                     margin: 0,
                   }}
                 >
-                  Sua status page pública já está no ar. Compartilhe com seus
-                  clientes e equipe.
+                  {t("onboarding_modal.on")}
                 </p>
               </div>
 
@@ -495,7 +496,7 @@ export function OnboardingModal({
                     margin: "0 0 8px",
                   }}
                 >
-                  Sua status page
+                  {t("onboarding_modal.your_url")}
                 </p>
                 <div
                   style={{
@@ -537,7 +538,9 @@ export function OnboardingModal({
                       }}
                     >
                       <Copy size={11} />
-                      {copied ? "Copiado!" : "Copiar"}
+                      {copied
+                        ? t("onboarding_modal.copied")
+                        : t("onboarding_modal.copy")}
                     </button>
                     <a
                       href={statusUrl}
@@ -581,7 +584,7 @@ export function OnboardingModal({
                     gap: "6px",
                   }}
                 >
-                  Ir pro dashboard <ArrowRight size={13} />
+                  {t("onboarding_modal.go_to_dash")} <ArrowRight size={13} />
                 </button>
                 <a
                   href={statusUrl}
@@ -601,7 +604,7 @@ export function OnboardingModal({
                     fontFamily: "'JetBrains Mono', monospace",
                   }}
                 >
-                  <ExternalLink size={12} /> Ver page
+                  <ExternalLink size={12} /> {t("onboarding_modal.see")}
                 </a>
               </div>
             </div>

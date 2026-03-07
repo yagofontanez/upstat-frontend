@@ -12,52 +12,7 @@ import {
   removeDependency,
   type ExternalService,
 } from "../services/dependencies";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  payment: "Pagamento",
-  hosting: "Hospedagem",
-  ai: "IA",
-  email: "Email",
-  cdn: "CDN",
-  communication: "Comunicação",
-  devtools: "Dev Tools",
-};
-
-const INDICATOR_CONFIG: Record<
-  string,
-  { label: string; color: string; bg: string; border: string }
-> = {
-  none: {
-    label: "Operacional",
-    color: "#22C55E",
-    bg: "rgba(34,197,94,0.08)",
-    border: "rgba(34,197,94,0.2)",
-  },
-  minor: {
-    label: "Degradado",
-    color: "#F59E0B",
-    bg: "rgba(245,158,11,0.08)",
-    border: "rgba(245,158,11,0.2)",
-  },
-  major: {
-    label: "Parcial",
-    color: "#F59E0B",
-    bg: "rgba(245,158,11,0.08)",
-    border: "rgba(245,158,11,0.2)",
-  },
-  critical: {
-    label: "Fora do ar",
-    color: "#EF4444",
-    bg: "rgba(239,68,68,0.08)",
-    border: "rgba(239,68,68,0.2)",
-  },
-  unknown: {
-    label: "Desconhecido",
-    color: "#bbbbbbbb",
-    bg: "rgba(255,255,255,0.04)",
-    border: "rgba(255,255,255,0.08)",
-  },
-};
+import { useTranslation } from "react-i18next";
 
 function getLogo(websiteUrl: string) {
   try {
@@ -97,6 +52,44 @@ function ServiceLogo({
 }
 
 function StatusIndicator({ indicator }: { indicator: string | null }) {
+  const { t } = useTranslation();
+
+  const INDICATOR_CONFIG: Record<
+    string,
+    { label: string; color: string; bg: string; border: string }
+  > = {
+    none: {
+      label: t("dependencies.indicator.operational"),
+      color: "#22C55E",
+      bg: "rgba(34,197,94,0.08)",
+      border: "rgba(34,197,94,0.2)",
+    },
+    minor: {
+      label: t("dependencies.indicator.degradated"),
+      color: "#F59E0B",
+      bg: "rgba(245,158,11,0.08)",
+      border: "rgba(245,158,11,0.2)",
+    },
+    major: {
+      label: t("dependencies.indicator.partial"),
+      color: "#F59E0B",
+      bg: "rgba(245,158,11,0.08)",
+      border: "rgba(245,158,11,0.2)",
+    },
+    critical: {
+      label: t("dependencies.indicator.down"),
+      color: "#EF4444",
+      bg: "rgba(239,68,68,0.08)",
+      border: "rgba(239,68,68,0.2)",
+    },
+    unknown: {
+      label: t("dependencies.indicator.unknown"),
+      color: "#bbbbbbbb",
+      bg: "rgba(255,255,255,0.04)",
+      border: "rgba(255,255,255,0.08)",
+    },
+  };
+
   const cfg = INDICATOR_CONFIG[indicator ?? "none"] ?? INDICATOR_CONFIG.unknown;
   return (
     <span
@@ -137,6 +130,8 @@ function ServiceCard({
   toggling: string | null;
   onToggle: (s: ExternalService) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="service-card"
@@ -197,7 +192,7 @@ function ServiceCard({
               flexShrink: 0,
             }}
           >
-            Ativo
+            {t("dependencies.active")}
           </span>
         )}
       </div>
@@ -227,11 +222,11 @@ function ServiceCard({
       >
         {service.is_dependency ? (
           <>
-            <X size={10} /> Remover
+            <X size={10} /> {t("dependencies.remove")}
           </>
         ) : (
           <>
-            <Plus size={10} /> Adicionar
+            <Plus size={10} /> {t("dependencies.add")}
           </>
         )}
       </button>
@@ -240,12 +235,23 @@ function ServiceCard({
 }
 
 export function DependenciesPage() {
+  const { t } = useTranslation();
   const [services, setServices] = useState<ExternalService[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCatalog, setShowCatalog] = useState(false);
   const [toggling, setToggling] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  const CATEGORY_LABELS: Record<string, string> = {
+    payment: t("dependencies.category.payment"),
+    hosting: t("dependencies.category.hosting"),
+    ai: t("dependencies.category.ai"),
+    email: t("dependencies.category.email"),
+    cdn: t("dependencies.category.cdn"),
+    communication: t("dependencies.category.communication"),
+    devtools: t("dependencies.category.devtools"),
+  };
 
   async function fetchData() {
     const data = await getServices();
@@ -357,7 +363,7 @@ export function DependenciesPage() {
             Dependency Map
           </h2>
           <p style={{ color: "#bbbbbbbb", fontSize: "12px", margin: 0 }}>
-            Monitore os serviços externos que sua stack depende
+            {t("dependencies.desc")}
           </p>
         </div>
         <button
@@ -379,7 +385,9 @@ export function DependenciesPage() {
           }}
         >
           {showCatalog ? <X size={14} /> : <Plus size={14} />}
-          {showCatalog ? "Fechar catálogo" : "Adicionar serviço"}
+          {showCatalog
+            ? t("dependencies.close")
+            : t("dependencies.add_service")}
         </button>
       </div>
 
@@ -398,7 +406,7 @@ export function DependenciesPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar serviço..."
+            placeholder={t("dependencies.search")}
             className="input-search"
             style={{
               width: "100%",
@@ -442,7 +450,9 @@ export function DependenciesPage() {
                   fontFamily: "'JetBrains Mono', monospace",
                 }}
               >
-                {cat === "all" ? "Todos" : (CATEGORY_LABELS[cat] ?? cat)}
+                {cat === "all"
+                  ? t("dependencies.all")
+                  : (CATEGORY_LABELS[cat] ?? cat)}
               </button>
             ))}
           </div>
@@ -517,7 +527,7 @@ export function DependenciesPage() {
           <p
             style={{ color: "#bbbbbbbb", fontSize: "13px", margin: "0 0 12px" }}
           >
-            Nenhuma dependência mapeada ainda.
+            {t("dependencies.0_dependencies")}
           </p>
           <button
             onClick={() => setShowCatalog(true)}
@@ -531,7 +541,7 @@ export function DependenciesPage() {
               fontWeight: 600,
             }}
           >
-            Adicionar serviço →
+            {t("dependencies.add_service_2")}
           </button>
         </div>
       ) : (
@@ -562,7 +572,7 @@ export function DependenciesPage() {
                       s.current_indicator && s.current_indicator !== "none",
                   ).length
                 }{" "}
-                dependência(s) com problema
+                {t("dependencies.w_problem")}
               </span>
             </div>
           ) : (
@@ -583,7 +593,7 @@ export function DependenciesPage() {
               <span
                 style={{ fontSize: "13px", color: "#00D4AA", fontWeight: 600 }}
               >
-                Todas as dependências operacionais
+                {t("dependencies.all_ok")}
               </span>
             </div>
           )}
@@ -724,7 +734,7 @@ export function DependenciesPage() {
                         e.currentTarget.style.borderColor = "transparent";
                       }}
                     >
-                      <X size={11} /> Remover
+                      <X size={11} /> {t("dependencies.remove")}
                     </button>
                   </div>
                 </div>

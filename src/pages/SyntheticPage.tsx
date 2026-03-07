@@ -23,14 +23,7 @@ import {
   type SyntheticMonitor,
   type SyntheticStep,
 } from "../services/synthetic";
-
-const ACTION_LABELS: Record<string, string> = {
-  navigate: "Navegar para URL",
-  click: "Clicar em elemento",
-  fill: "Preencher campo",
-  waitFor: "Aguardar elemento",
-  assertText: "Verificar texto",
-};
+import { useTranslation } from "react-i18next";
 
 const ACTION_COLORS: Record<string, string> = {
   navigate: "#3B82F6",
@@ -45,16 +38,6 @@ function formatDuration(ms: number) {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-function timeAgo(date: string) {
-  const diff = Date.now() - new Date(date).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "agora";
-  if (mins < 60) return `${mins}m atrás`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h atrás`;
-  return `${Math.floor(hrs / 24)}d atrás`;
-}
-
 const emptyStep = (): SyntheticStep => ({
   order_index: 0,
   action: "navigate",
@@ -63,6 +46,7 @@ const emptyStep = (): SyntheticStep => ({
 });
 
 export default function SyntheticPage() {
+  const { t } = useTranslation();
   const [monitors, setMonitors] = useState<SyntheticMonitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -76,6 +60,24 @@ export default function SyntheticPage() {
   const [formInterval, setFormInterval] = useState(10);
   const [formSteps, setFormSteps] = useState<SyntheticStep[]>([emptyStep()]);
   const [creating, setCreating] = useState(false);
+
+  const ACTION_LABELS: Record<string, string> = {
+    navigate: t("synthetic.action_labels.navigate"),
+    click: t("synthetic.action_labels.click"),
+    fill: t("synthetic.action_labels.fill"),
+    waitFor: t("synthetic.action_labels.waitFor"),
+    assertText: t("synthetic.action_labels.assertText"),
+  };
+
+  function timeAgo(date: string) {
+    const diff = Date.now() - new Date(date).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t("synthetic.time_ago.now");
+    if (mins < 60) return `${mins}${t("synthetic.time_ago.min_ago")}`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}${t("synthetic.time_ago.hour_ago")}`;
+    return `${Math.floor(hrs / 24)}${t("synthetic.time_ago.days_ago")}`;
+  }
 
   useEffect(() => {
     loadMonitors();
@@ -115,7 +117,7 @@ export default function SyntheticPage() {
 
   async function handleDelete(id: string, e?: React.MouseEvent) {
     e?.stopPropagation();
-    if (!confirm("Deletar esse monitor?")) return;
+    if (!confirm(t("synthetic.delete_confirm"))) return;
     await deleteSyntheticMonitor(id);
     setMonitors((m) => m.filter((x) => x.id !== id));
     if (selectedMonitor?.id === id) setSelectedMonitor(null);
@@ -209,7 +211,7 @@ export default function SyntheticPage() {
               letterSpacing: "0.5px",
             }}
           >
-            Simule fluxos reais de usuário e detecte falhas antes deles.
+            {t("synthetic.desc")}
           </p>
         </div>
         <button
@@ -231,7 +233,7 @@ export default function SyntheticPage() {
           }}
         >
           <Plus size={14} />
-          Novo Monitor
+          {t("synthetic.new")}
         </button>
       </div>
 
@@ -271,10 +273,10 @@ export default function SyntheticPage() {
                 style={{ margin: "0 auto 16px" }}
               />
               <p style={{ color: "#bbbbbbbb", fontSize: "13px" }}>
-                Nenhum monitor sintético ainda.
+                {t("synthetic.0_monitors")}
               </p>
               <p style={{ color: "#333", fontSize: "12px", marginTop: "4px" }}>
-                Crie um para simular fluxos de usuário.
+                {t("synthetic.create_one")}
               </p>
             </div>
           ) : (
@@ -346,8 +348,8 @@ export default function SyntheticPage() {
                       >
                         {m.last_checked_at
                           ? timeAgo(m.last_checked_at)
-                          : "nunca executado"}{" "}
-                        · a cada {m.interval_minutes}min
+                          : t("synthetic.never_exec")}{" "}
+                        · {t("synthetic.in")} {m.interval_minutes}min
                       </div>
                     </div>
                   </div>
@@ -487,7 +489,8 @@ export default function SyntheticPage() {
                           marginTop: "3px",
                         }}
                       >
-                        a cada {selectedMonitor.interval_minutes} minutos
+                        {t("synthetic.in")} {selectedMonitor.interval_minutes}{" "}
+                        {t("synthetic.min")}
                       </div>
                     </div>
                     <button
@@ -575,7 +578,7 @@ export default function SyntheticPage() {
                         marginBottom: "10px",
                       }}
                     >
-                      Últimas execuções
+                      {t("synthetic.last_exec")}
                     </div>
                     <div
                       style={{
@@ -593,7 +596,7 @@ export default function SyntheticPage() {
                             padding: "20px",
                           }}
                         >
-                          Nenhuma execução ainda.
+                          {t("synthetic.0_exec")}
                         </div>
                       )}
                       {selectedMonitor.results?.map((r) => (
@@ -706,7 +709,7 @@ export default function SyntheticPage() {
                                 fontFamily: "inherit",
                               }}
                             >
-                              <Image size={11} /> Ver screenshot
+                              <Image size={11} /> {t("synthetic.see_img")}
                             </button>
                           )}
                         </div>
@@ -757,7 +760,7 @@ export default function SyntheticPage() {
               <div
                 style={{ fontSize: "15px", fontWeight: 700, color: "#F0F6FC" }}
               >
-                Novo Monitor Sintético
+                {t("synthetic.new_monitor")}
               </div>
               <button
                 onClick={() => setShowCreate(false)}
@@ -783,12 +786,12 @@ export default function SyntheticPage() {
                   marginBottom: "6px",
                 }}
               >
-                Nome
+                {t("synthetic.name")}
               </label>
               <input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="ex: Checkout Flow"
+                placeholder={t("synthetic.name_placeholder")}
                 style={{
                   width: "100%",
                   background: "rgba(255,255,255,0.04)",
@@ -815,7 +818,7 @@ export default function SyntheticPage() {
                   marginBottom: "6px",
                 }}
               >
-                Intervalo (minutos)
+                {t("synthetic.interval")}
               </label>
               <select
                 value={formInterval}
@@ -919,7 +922,7 @@ export default function SyntheticPage() {
                             marginBottom: "4px",
                           }}
                         >
-                          Ação
+                          {t("synthetic.action")}
                         </label>
                         <select
                           value={step.action}
@@ -960,7 +963,7 @@ export default function SyntheticPage() {
                               marginBottom: "4px",
                             }}
                           >
-                            Selector CSS
+                            {t("synthetic.css")}
                           </label>
                           <input
                             value={step.selector}
@@ -1002,8 +1005,8 @@ export default function SyntheticPage() {
                             {step.action === "navigate"
                               ? "URL"
                               : step.action === "assertText"
-                                ? "Texto esperado"
-                                : "Valor"}
+                                ? t("synthetic.expected_text")
+                                : t("synthetic.value")}
                           </label>
                           <input
                             value={step.value}
@@ -1052,7 +1055,7 @@ export default function SyntheticPage() {
                   transition: "all 0.15s",
                 }}
               >
-                <Plus size={13} /> Adicionar step
+                <Plus size={13} /> {t("synthetic.add")}
               </button>
             </div>
 
@@ -1088,7 +1091,7 @@ export default function SyntheticPage() {
               ) : (
                 <Plus size={14} />
               )}
-              Criar Monitor
+              {t("synthetic.create")}
             </button>
           </div>
         </div>

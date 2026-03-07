@@ -9,19 +9,22 @@ import {
   FlaskConical,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Monitores", icon: Activity, path: "/monitors" },
-  { label: "Plano", icon: Zap, path: "/billing" },
-  { label: "Dependências", icon: GitBranch, path: "/dependencies" },
-  { label: "Monitores Sintéticos", icon: FlaskConical, path: "/synthetic" },
-  { label: "Configurações", icon: Settings, path: "/settings" },
-];
+import { useTranslation } from "react-i18next";
+import { LanguageToggle } from "./LanguageToggle";
 
 export function Sidebar() {
   const { pathname } = useLocation();
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
+
+  const navItems = [
+    { label: t("nav.dash"), icon: LayoutDashboard, path: "/dashboard" },
+    { label: t("nav.monitors"), icon: Activity, path: "/monitors" },
+    { label: t("nav.plans"), icon: Zap, path: "/billing" },
+    { label: t("nav.dependencies"), icon: GitBranch, path: "/dependencies" },
+    { label: t("nav.synthetic"), icon: FlaskConical, path: "/synthetic" },
+    { label: t("nav.config"), icon: Settings, path: "/settings" },
+  ];
 
   return (
     <aside
@@ -36,6 +39,7 @@ export function Sidebar() {
         flexDirection: "column",
         fontFamily: "'JetBrains Mono', 'Courier New', monospace",
       }}
+      key={i18n.language}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
@@ -185,7 +189,9 @@ export function Sidebar() {
             </p>
           </div>
         </div>
-
+        <div style={{ padding: "4px 12px", marginBottom: "4px" }}>
+          <LanguageToggle />
+        </div>
         <button
           onClick={logout}
           className="logout-btn"
@@ -205,7 +211,7 @@ export function Sidebar() {
           }}
         >
           <LogOut size={14} />
-          Sair
+          {t("nav.logout")}
         </button>
       </div>
     </aside>

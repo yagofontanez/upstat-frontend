@@ -25,25 +25,28 @@ import {
 import { useNavigate } from "react-router-dom";
 import { UpgradeModal } from "../components/UpgradeModal";
 import { useAuth } from "../hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
+
   const config = {
     up: {
-      label: "Online",
+      label: t("monitor.status.online"),
       bg: "rgba(34,197,94,0.08)",
       border: "rgba(34,197,94,0.2)",
       color: "#22C55E",
       dot: "#22C55E",
     },
     down: {
-      label: "Offline",
+      label: t("monitor.status.off"),
       bg: "rgba(239,68,68,0.08)",
       border: "rgba(239,68,68,0.2)",
       color: "#EF4444",
       dot: "#EF4444",
     },
     pending: {
-      label: "Verificando",
+      label: t("monitor.status.verifying"),
       bg: "rgba(245,158,11,0.08)",
       border: "rgba(245,158,11,0.2)",
       color: "#F59E0B",
@@ -133,6 +136,7 @@ function monitorToForm(m: Monitor): MonitorFormData {
 
 export function MonitorsPage() {
   const { user } = useAuth();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [pinging, setPinging] = useState<string | null>(null);
   const [monitors, setMonitors] = useState<Monitor[]>([]);
@@ -265,7 +269,7 @@ export function MonitorsPage() {
         closeForm();
         setShowUpgradeModal(true);
       } else {
-        setError(err.response?.data?.error || "Erro ao salvar monitor");
+        setError(err.response?.data?.error || t("monitor.status.error"));
       }
     } finally {
       setSubmitting(false);
@@ -273,7 +277,7 @@ export function MonitorsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Tem certeza que deseja remover este monitor?")) return;
+    if (!confirm(t("monitor.status.confirm_delete"))) return;
     await deleteMonitor(id);
     setMonitors((prev) => prev.filter((m) => m.id !== id));
   }
@@ -327,6 +331,11 @@ export function MonitorsPage() {
     fontFamily: "'JetBrains Mono', monospace",
   };
 
+  const tableGrid =
+    i18n.language === "en"
+      ? "1fr 90px 80px 100px 340px"
+      : "1fr 80px 90px 90px 390px";
+
   return (
     <div style={{ fontFamily: "'JetBrains Mono', 'Courier New', monospace" }}>
       <style>{`
@@ -340,7 +349,7 @@ export function MonitorsPage() {
         .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .input-focus:focus { border-color: #00D4AA !important; box-shadow: 0 0 0 3px rgba(0,212,170,0.08) !important; outline: none !important; }
 
-        .mon-table-header { display: grid; grid-template-columns: 1fr 110px 90px 90px auto; align-items: center; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .mon-table-header { display: grid; grid-template-columns: ${tableGrid}; align-items: center; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); }
         .mon-table-row { display: grid; grid-template-columns: 1fr 110px 90px 90px auto; align-items: center; padding: 14px 20px; }
         .mon-mobile-row { display: none; padding: 14px 20px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -376,11 +385,13 @@ export function MonitorsPage() {
               margin: "0 0 4px",
             }}
           >
-            Monitores
+            {t("monitor.monitors")}
           </h2>
           <p style={{ color: "#555", fontSize: "12px", margin: 0 }}>
-            {monitors.length} monitor{monitors.length !== 1 ? "es" : ""}{" "}
-            cadastrado{monitors.length !== 1 ? "s" : ""}
+            {monitors.length} monitor
+            {monitors.length !== 1 ? t("monitor.monitor_prefix") : ""}{" "}
+            {t("monitor.registered")}
+            {monitors.length !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="mon-header-actions">
@@ -409,7 +420,7 @@ export function MonitorsPage() {
               }}
             />
             <span className="mon-header-refresh-label">
-              {refreshed ? "Atualizado!" : "Atualizar"}
+              {refreshed ? t("monitor.refreshed") : t("monitor.refresh")}
             </span>
           </button>
           <button
@@ -430,7 +441,7 @@ export function MonitorsPage() {
             }}
           >
             <Plus size={14} />
-            <span>Novo monitor</span>
+            <span>{t("monitor.new")}</span>
           </button>
         </div>
       </div>
@@ -459,8 +470,8 @@ export function MonitorsPage() {
               style={{ fontSize: "13px", fontWeight: 700, color: "#F0F6FC" }}
             >
               {editingMonitor
-                ? `Editando: ${editingMonitor.name}`
-                : "Novo monitor"}
+                ? `${t("monitor.editing")} ${editingMonitor.name}`
+                : t("monitor.new")}
             </span>
             <button
               type="button"
@@ -495,19 +506,19 @@ export function MonitorsPage() {
 
           <div className="form-grid" style={{ marginBottom: "14px" }}>
             <div>
-              <label style={labelStyle}>Nome</label>
+              <label style={labelStyle}>{t("monitor.name")}</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 style={inputStyle}
                 className="input-focus"
-                placeholder="Minha API"
+                placeholder={t("monitor.name_placeholder")}
                 required
               />
             </div>
             <div>
-              <label style={labelStyle}>Tipo</label>
+              <label style={labelStyle}>{t("monitor.type")}</label>
               <div style={{ display: "flex", gap: "6px" }}>
                 {(["http", "tcp"] as const).map((t) => (
                   <button
@@ -544,13 +555,13 @@ export function MonitorsPage() {
                 onChange={(e) => setForm({ ...form, url: e.target.value })}
                 style={inputStyle}
                 className="input-focus"
-                placeholder="https://minha-api.com/health"
+                placeholder={t("monitor.url_placeholder")}
                 required
               />
             </div>
             {form.monitorType === "tcp" && (
               <div>
-                <label style={labelStyle}>Porta</label>
+                <label style={labelStyle}>{t("monitor.port")}</label>
                 <input
                   type="number"
                   value={form.tcpPort}
@@ -581,7 +592,7 @@ export function MonitorsPage() {
                       letterSpacing: 0,
                     }}
                   >
-                    (opcional)
+                    {t("monitor.optional")}
                   </span>
                   <div style={{ position: "relative" }}>
                     <button
@@ -621,9 +632,7 @@ export function MonitorsPage() {
                           letterSpacing: 0,
                         }}
                       >
-                        Verifica se esta palavra aparece na resposta. Se não
-                        aparecer, o monitor é marcado como offline mesmo com
-                        status 200.
+                        {t("monitor.tooltip")}
                       </div>
                     )}
                   </div>
@@ -636,14 +645,14 @@ export function MonitorsPage() {
                   }
                   style={inputStyle}
                   className="input-focus"
-                  placeholder='"operational" ou "ok"'
+                  placeholder={t("monitor.keyword_placeholder")}
                 />
               </div>
             )}
             {form.monitorType === "http" && (
               <>
                 <div style={{ gridColumn: "1 / -1" }}>
-                  <label style={labelStyle}>Método HTTP</label>
+                  <label style={labelStyle}>{t("monitor.method")}</label>
                   <div
                     style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}
                   >
@@ -693,8 +702,7 @@ export function MonitorsPage() {
                       padding: 0,
                     }}
                   >
-                    {showAdvanced ? "▾" : "▸"} Configurações avançadas (headers
-                    e body)
+                    {showAdvanced ? "▾" : "▸"} {t("monitor.advanced")}
                   </button>
                 </div>
 
@@ -710,7 +718,7 @@ export function MonitorsPage() {
                             letterSpacing: 0,
                           }}
                         >
-                          (opcional, um por linha: Key: Value)
+                          {t("monitor.optional_header")}
                         </span>
                       </label>
                       <textarea
@@ -764,7 +772,7 @@ export function MonitorsPage() {
                                   ),
                                 });
                               } catch {
-                                window.alert("JSON Inválido.");
+                                window.alert(t("monitor.invalid_json"));
                               }
                             }}
                             style={{
@@ -803,7 +811,7 @@ export function MonitorsPage() {
             )}
             {user?.plan === "pro" && (
               <div>
-                <label style={labelStyle}>Meta de SLA (%)</label>
+                <label style={labelStyle}>{t("monitor.sla_target")}</label>
                 <input
                   type="number"
                   value={form.slaTarget}
@@ -840,11 +848,11 @@ export function MonitorsPage() {
             >
               {submitting
                 ? editingMonitor
-                  ? "Salvando..."
-                  : "Criando..."
+                  ? t("monitor.saving")
+                  : t("monitor.creating")
                 : editingMonitor
-                  ? "Salvar alterações"
-                  : "Criar monitor"}
+                  ? t("monitor.save")
+                  : t("monitor.create")}
             </button>
             <button
               type="button"
@@ -858,7 +866,7 @@ export function MonitorsPage() {
                 fontFamily: "'JetBrains Mono', monospace",
               }}
             >
-              Cancelar
+              {t("monitor.cancel")}
             </button>
           </div>
         </form>
@@ -875,7 +883,13 @@ export function MonitorsPage() {
       >
         {monitors.length > 0 && (
           <div className="mon-table-header">
-            {["Monitor", "Status", "Latência", "Uptime", "Ações"].map((col) => (
+            {[
+              t("monitor.monitor"),
+              t("monitor.stat"),
+              t("monitor.latency"),
+              t("monitor.uptime"),
+              t("monitor.actions"),
+            ].map((col) => (
               <span
                 key={col}
                 style={{
@@ -909,7 +923,7 @@ export function MonitorsPage() {
               <Activity size={20} color="#00D4AA" />
             </div>
             <p style={{ color: "#555", fontSize: "13px", margin: "0 0 12px" }}>
-              Nenhum monitor ainda.
+              {t("monitor.0_monitors")}
             </p>
             <button
               onClick={openCreate}
@@ -923,7 +937,7 @@ export function MonitorsPage() {
                 fontWeight: 600,
               }}
             >
-              Criar primeiro monitor →
+              {t("monitor.create_first")}
             </button>
           </div>
         ) : (
@@ -941,7 +955,6 @@ export function MonitorsPage() {
 
             return (
               <div key={monitor.id}>
-                {/* Desktop row */}
                 <div
                   className="monitor-card mon-table-row"
                   style={{ borderBottom, opacity: monitor.is_active ? 1 : 0.5 }}
@@ -1080,7 +1093,7 @@ export function MonitorsPage() {
                       }}
                     >
                       <Zap size={11} />
-                      {pinging === monitor.id ? "..." : "Testar"}
+                      {pinging === monitor.id ? "..." : t("monitor.test")}
                     </button>
                     <button
                       className="icon-btn"
@@ -1114,7 +1127,9 @@ export function MonitorsPage() {
                       ) : (
                         <Play size={11} />
                       )}
-                      {monitor.is_active ? "Pausar" : "Reativar"}
+                      {monitor.is_active
+                        ? t("monitor.pause")
+                        : t("monitor.despause")}
                     </button>
                     <button
                       className="icon-btn"
@@ -1138,7 +1153,7 @@ export function MonitorsPage() {
                       }}
                     >
                       <Pencil size={11} />
-                      Editar
+                      {t("monitor.edit")}
                     </button>
                     <button
                       className="icon-btn"
@@ -1161,7 +1176,7 @@ export function MonitorsPage() {
                           "rgba(255,255,255,0.09)";
                       }}
                     >
-                      Detalhes
+                      {t("monitor.details")}
                     </button>
                     <div
                       style={{
@@ -1199,7 +1214,6 @@ export function MonitorsPage() {
                   </div>
                 </div>
 
-                {/* Mobile row */}
                 <div
                   className="monitor-card mon-mobile-row"
                   style={{ borderBottom, opacity: monitor.is_active ? 1 : 0.5 }}
@@ -1325,7 +1339,7 @@ export function MonitorsPage() {
                         }}
                       >
                         <Zap size={11} />
-                        {pinging === monitor.id ? "..." : "Testar"}
+                        {pinging === monitor.id ? "..." : t("monitor.test")}
                       </button>
                       <button
                         className="icon-btn"
@@ -1345,7 +1359,7 @@ export function MonitorsPage() {
                         }}
                       >
                         <Pencil size={11} />
-                        Editar
+                        {t("monitor.edit")}
                       </button>
                       <button
                         className="icon-btn"
@@ -1364,7 +1378,7 @@ export function MonitorsPage() {
                           e.currentTarget.style.color = "#bbbbbb";
                         }}
                       >
-                        Detalhes
+                        {t("monitor.details")}
                       </button>
                       <button
                         className="icon-btn"

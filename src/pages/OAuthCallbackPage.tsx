@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 export default function OAuthCallbackPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -30,7 +32,7 @@ export default function OAuthCallbackPage() {
         fontSize: "13px",
       }}
     >
-      Autenticando...
+      {t("authenticating")}
     </div>
   );
 }

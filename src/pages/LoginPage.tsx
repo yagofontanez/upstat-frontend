@@ -1,37 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-
-const monitors = [
-  {
-    name: "API Principal",
-    url: "api.minha-startup.com",
-    status: "up",
-    latency: 142,
-    uptime: 99.98,
-  },
-  {
-    name: "Dashboard Web",
-    url: "app.minha-startup.com",
-    status: "up",
-    latency: 89,
-    uptime: 100,
-  },
-  {
-    name: "Worker Queue",
-    url: "queue.minha-startup.com",
-    status: "down",
-    latency: null,
-    uptime: 97.2,
-  },
-  {
-    name: "Auth Service",
-    url: "auth.minha-startup.com",
-    status: "up",
-    latency: 56,
-    uptime: 99.99,
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const UPTIME_BARS = Array.from({ length: 36 }, (_, i) => {
   if (i === 4 || i === 18) return "down";
@@ -65,10 +35,42 @@ function UptimeBars() {
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const monitors = [
+    {
+      name: t("login.api"),
+      url: t("login.api_url"),
+      status: "up",
+      latency: 142,
+      uptime: 99.98,
+    },
+    {
+      name: t("login.dash"),
+      url: t("login.dash_url"),
+      status: "up",
+      latency: 89,
+      uptime: 100,
+    },
+    {
+      name: t("login.worker"),
+      url: t("login.worker_url"),
+      status: "down",
+      latency: null,
+      uptime: 97.2,
+    },
+    {
+      name: t("login.auth"),
+      url: t("login.auth_url"),
+      status: "up",
+      latency: 56,
+      uptime: 99.99,
+    },
+  ];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,7 +80,7 @@ export function LoginPage() {
       await login(email, password);
       navigate("/dashboard");
     } catch {
-      setError("Email ou senha incorretos");
+      setError(t("login.error"));
     } finally {
       setLoading(false);
     }
@@ -213,10 +215,10 @@ export function LoginPage() {
                 letterSpacing: "-1px",
               }}
             >
-              Seu sistema caiu.
+              {t("login.system_down")}
               <br />
               <span style={{ color: "#00D4AA", fontStyle: "italic" }}>
-                Você vai saber primeiro.
+                {t("login.know_first")}
               </span>
             </div>
           </div>
@@ -293,7 +295,7 @@ export function LoginPage() {
                     color: "#F0F6FC",
                   }}
                 >
-                  Monitores
+                  {t("monitor.monitors")}
                 </span>
                 <div
                   style={{
@@ -313,7 +315,7 @@ export function LoginPage() {
                       animation: "pulse-dot 2s infinite",
                     }}
                   />
-                  ao vivo
+                  {t("login.live")}
                 </div>
               </div>
 
@@ -400,9 +402,9 @@ export function LoginPage() {
             }}
           >
             {[
-              { label: "uptime médio", value: "99.8%" },
-              { label: "tempo de resposta", value: "96ms" },
-              { label: "incidentes (7d)", value: "1" },
+              { label: t("login.uptime"), value: "99.8%" },
+              { label: t("login.answer"), value: "96ms" },
+              { label: t("login.incidents"), value: "1" },
             ].map((s) => (
               <div
                 key={s.label}
@@ -471,7 +473,7 @@ export function LoginPage() {
               opacity: 0.7,
             }}
           >
-            // acesso
+            {t("login.access")}
           </div>
           <h1
             style={{
@@ -482,10 +484,10 @@ export function LoginPage() {
               margin: 0,
             }}
           >
-            Bem-vindo de volta
+            {t("login.welcome_back")}
           </h1>
           <p style={{ color: "#bbbbbb", fontSize: "13px", marginTop: "8px" }}>
-            Entre pra ver seus monitores
+            {t("login.login")}
           </p>
         </div>
 
@@ -518,14 +520,14 @@ export function LoginPage() {
                 textTransform: "uppercase",
               }}
             >
-              Email
+              {t("login.email")}
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="input-field"
-              placeholder="seu@email.com"
+              placeholder={t("login.email_placeholder")}
               required
             />
           </div>
@@ -541,7 +543,7 @@ export function LoginPage() {
                 textTransform: "uppercase",
               }}
             >
-              Senha
+              {t("login.password")}
             </label>
             <input
               type="password"
@@ -555,7 +557,7 @@ export function LoginPage() {
 
           <div className="fade-up-4">
             <button type="submit" disabled={loading} className="submit-btn">
-              {loading ? "Entrando..." : "Entrar →"}
+              {loading ? t("login.logging") : t("login.log_in")}
             </button>
           </div>
 
@@ -582,7 +584,7 @@ export function LoginPage() {
                   letterSpacing: "1px",
                 }}
               >
-                OU
+                {t("login.or")}
               </span>
               <div
                 style={{
@@ -632,7 +634,7 @@ export function LoginPage() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                Continuar com Google
+                {t("login.google")}
               </a>
               <a
                 href={`${import.meta.env.VITE_API_URL}/auth/github`}
@@ -656,7 +658,7 @@ export function LoginPage() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#F0F6FC">
                   <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                 </svg>
-                Continuar com GitHub
+                {t("login.github")}
               </a>
             </div>
           </div>
@@ -673,7 +675,7 @@ export function LoginPage() {
             color: "#bbbbbb",
           }}
         >
-          Não tem conta?{" "}
+          {t("login.doesnt_have_account")}{" "}
           <Link
             to="/register"
             style={{
@@ -682,7 +684,7 @@ export function LoginPage() {
               fontWeight: 600,
             }}
           >
-            Cadastre-se grátis
+            {t("login.register")}
           </Link>
         </div>
       </div>

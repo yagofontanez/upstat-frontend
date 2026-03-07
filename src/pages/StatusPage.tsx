@@ -1,8 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../services/api";
 import { CheckCircle, XCircle, AlertCircle, Clock } from "lucide-react";
 import { UptimeBar } from "../components/UptimeBar";
+import { useTranslation } from "react-i18next";
 
 interface DayData {
   day: string;
@@ -47,17 +49,8 @@ function formatDuration(ms: number) {
   return `${Math.floor(hours / 24)}d ${hours % 24}h`;
 }
 
-function timeAgo(date: string) {
-  const diff = Date.now() - new Date(date).getTime();
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "agora";
-  if (minutes < 60) return `${minutes}min atrás`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h atrás`;
-  return `${Math.floor(hours / 24)}d atrás`;
-}
-
 export function StatusPage() {
+  const { t } = useTranslation();
   const { slug } = useParams();
   const [data, setData] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,10 +74,10 @@ export function StatusPage() {
     if (!data) return;
     const status =
       data.overall_status === "operational"
-        ? "✅ Todos os sistemas operacionais"
+        ? t("status_page.all_ok")
         : data.overall_status === "degraded"
-          ? "⚠️ Desempenho degradado"
-          : "🔴 Interrupção em andamento";
+          ? t("status_page.degraded")
+          : t("status_page.down");
     document.title = `${data.page.title} — UpStat`;
     const setMeta = (name: string, content: string, property = false) => {
       const attr = property ? "property" : "name";
@@ -113,6 +106,16 @@ export function StatusPage() {
     );
     return () => clearInterval(timer);
   }, [data]);
+
+  function timeAgo(date: string) {
+    const diff = Date.now() - new Date(date).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return t("status_page.time_ago.now");
+    if (minutes < 60) return `${minutes}${t("status_page.time_ago.min_ago")}`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}${t("status_page.time_ago.hour_ago")}`;
+    return `${Math.floor(hours / 24)}${t("status_page.time_ago.days_ago")}`;
+  }
 
   if (loading) {
     return (
@@ -180,7 +183,7 @@ export function StatusPage() {
               letterSpacing: "-0.5px",
             }}
           >
-            Página não encontrada
+            {t("status_page.not_found")}
           </h1>
           <p
             style={{
@@ -190,7 +193,7 @@ export function StatusPage() {
               margin: "0 0 32px",
             }}
           >
-            Esta status page não existe ou foi removida.
+            {t("status_page.not_found_2")}
           </p>
           <a
             href="/"
@@ -206,7 +209,7 @@ export function StatusPage() {
               textDecoration: "none",
             }}
           >
-            Criar minha status page →
+            {t("status_page.create")}
           </a>
           <p style={{ color: "#333", fontSize: "12px", marginTop: "32px" }}>
             ● UpStat
@@ -220,21 +223,21 @@ export function StatusPage() {
 
   const statusConfig = {
     operational: {
-      label: "Todos os sistemas operacionais",
+      label: t("status_page.status_config.all_ok"),
       Icon: CheckCircle,
       color: "#22C55E",
       bg: "rgba(34,197,94,0.06)",
       border: "rgba(34,197,94,0.15)",
     },
     degraded: {
-      label: "Desempenho degradado",
+      label: t("status_page.status_config.degraded"),
       Icon: AlertCircle,
       color: "#F59E0B",
       bg: "rgba(245,158,11,0.06)",
       border: "rgba(245,158,11,0.15)",
     },
     down: {
-      label: "Interrupção em andamento",
+      label: t("status_page.status_config.down"),
       Icon: XCircle,
       color: "#EF4444",
       bg: "rgba(239,68,68,0.06)",
@@ -367,7 +370,7 @@ export function StatusPage() {
                 animation: "pulse-dot 2s infinite",
               }}
             />
-            atualiza em {countdown}s
+            {t("status_page.att_in")} {countdown}s
           </div>
         </div>
 
@@ -397,7 +400,7 @@ export function StatusPage() {
                   textTransform: "uppercase",
                 }}
               >
-                Serviços
+                {t("status_page.services")}
               </span>
             </div>
             {monitors.map((monitor, i) => (
@@ -504,10 +507,10 @@ export function StatusPage() {
                       }}
                     >
                       {monitor.status === "up"
-                        ? "Operacional"
+                        ? t("status_page.up")
                         : monitor.status === "down"
-                          ? "Fora do ar"
-                          : "Pendente"}
+                          ? t("status_page.down_stts")
+                          : t("status_page.pending")}
                     </span>
                   </div>
                 </div>
@@ -542,7 +545,7 @@ export function StatusPage() {
                 textTransform: "uppercase",
               }}
             >
-              Incidentes recentes
+              {t("status_page.incidents")}
             </span>
           </div>
           {incidents.length === 0 ? (
@@ -564,7 +567,7 @@ export function StatusPage() {
                 🎉
               </div>
               <p style={{ color: "#bbbbbb", fontSize: "13px", margin: 0 }}>
-                Nenhum incidente registrado.
+                {t("status_page.0_incidents")}
               </p>
             </div>
           ) : (
@@ -647,7 +650,9 @@ export function StatusPage() {
                     border: `1px solid ${incident.resolved_at ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}`,
                   }}
                 >
-                  {incident.resolved_at ? "Resolvido" : "Em andamento"}
+                  {incident.resolved_at
+                    ? t("status_page.resolved")
+                    : t("status_page.in_progress")}
                 </span>
               </div>
             ))

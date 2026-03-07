@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -12,19 +12,28 @@ import {
   FlaskConical,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Monitores", icon: Activity, path: "/monitors" },
-  { label: "Plano", icon: Zap, path: "/billing" },
-  { label: "Dependências", icon: GitBranch, path: "/dependencies" },
-  { label: "Monitores Sintéticos", icon: FlaskConical, path: "/synthetic" },
-  { label: "Configurações", icon: Settings, path: "/settings" },
-];
+import { useTranslation } from "react-i18next";
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const { pathname } = useLocation();
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
+  const [, setLang] = useState(i18n.language);
+
+  useEffect(() => {
+    const handler = (lng: string) => setLang(lng);
+    i18n.on("languageChanged", handler);
+    return () => i18n.off("languageChanged", handler);
+  }, [i18n]);
+
+  const navItems = [
+    { label: t("nav.dash"), icon: LayoutDashboard, path: "/dashboard" },
+    { label: t("nav.monitors"), icon: Activity, path: "/monitors" },
+    { label: t("nav.plans"), icon: Zap, path: "/billing" },
+    { label: t("nav.dependencies"), icon: GitBranch, path: "/dependencies" },
+    { label: t("nav.synthetic"), icon: FlaskConical, path: "/synthetic" },
+    { label: t("nav.config"), icon: Settings, path: "/settings" },
+  ];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -206,7 +215,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           }}
         >
           <LogOut size={14} />
-          Sair
+          {t("nav.logout")}
         </button>
       </div>
     </div>
