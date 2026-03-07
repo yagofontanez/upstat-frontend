@@ -106,6 +106,10 @@ export function SettingsPage() {
   const [slackEnabled, setSlackEnabled] = useState(false);
   const [savingSlack, setSavingSlack] = useState(false);
   const [slackSuccess, setSlackSuccess] = useState(false);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+  const [whatsappSuccess, setWhatsappSuccess] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -126,6 +130,10 @@ export function SettingsPage() {
         setPushEnabled(pushSubscribed);
         setSlackEnabled(notifRes.data.notifications.slack_enabled ?? false);
         setSlackWebhook(notifRes.data.notifications.slack_webhook_url ?? "");
+        setWhatsappEnabled(
+          notifRes.data.notifications.whatsapp_enabled ?? false,
+        );
+        setWhatsappNumber(notifRes.data.notifications.whatsapp_number ?? "");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -157,6 +165,22 @@ export function SettingsPage() {
       setTimeout(() => setSlackSuccess(false), 3000);
     } finally {
       setSavingSlack(false);
+    }
+  }
+
+  async function handleSaveWhatsapp() {
+    setSavingWhatsapp(true);
+    setWhatsappSuccess(false);
+    try {
+      await api.put("/settings/notifications", {
+        email_enabled: emailEnabled,
+        whatsapp_enabled: whatsappEnabled,
+        whatsapp_number: whatsappNumber,
+      });
+      setWhatsappSuccess(true);
+      setTimeout(() => setWhatsappSuccess(false), 3000);
+    } finally {
+      setSavingWhatsapp(false);
     }
   }
 
@@ -361,13 +385,6 @@ export function SettingsPage() {
               disabled: false,
             },
             {
-              label: "WhatsApp",
-              desc: "Disponível no plano Pro",
-              enabled: false,
-              onChange: () => {},
-              disabled: true,
-            },
-            {
               label: "Notificações no browser",
               desc: "Alertas mesmo com a aba fechada",
               enabled: pushEnabled,
@@ -437,6 +454,76 @@ export function SettingsPage() {
           </div>
         </Section>
       </div>
+
+      {user?.plan === "pro" && (
+        <div className="set-fade-3">
+          <Section title="WhatsApp" icon={<Bell size={14} />}>
+            <p
+              style={{
+                color: "#bbbbbb",
+                fontSize: "12px",
+                marginBottom: "16px",
+                lineHeight: 1.6,
+              }}
+            >
+              Receba alertas de downtime direto no seu WhatsApp.
+            </p>
+            <div style={{ marginBottom: "14px" }}>
+              <label style={labelStyle}>Número (formato E.164)</label>
+              <input
+                type="text"
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value)}
+                style={inputStyle}
+                className="input-focus"
+                placeholder="+5511999999999"
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "20px",
+              }}
+            >
+              <div>
+                <p
+                  style={{
+                    color: "#F0F6FC",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    margin: "0 0 2px",
+                  }}
+                >
+                  Ativar notificações
+                </p>
+                <p style={{ color: "#bbbbbb", fontSize: "11px", margin: 0 }}>
+                  Enviar alerta quando monitor cair ou recuperar
+                </p>
+              </div>
+              <Toggle
+                enabled={whatsappEnabled}
+                onChange={() => setWhatsappEnabled(!whatsappEnabled)}
+              />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <button
+                onClick={handleSaveWhatsapp}
+                disabled={savingWhatsapp}
+                style={{ ...saveBtn, opacity: savingWhatsapp ? 0.5 : 1 }}
+              >
+                {savingWhatsapp ? "Salvando..." : "Salvar"}
+              </button>
+              {whatsappSuccess && (
+                <span style={{ fontSize: "12px", color: "#22C55E" }}>
+                  ✓ Salvo
+                </span>
+              )}
+            </div>
+          </Section>
+        </div>
+      )}
 
       <div className="set-fade-3">
         <Section title="Slack" icon={<Bell size={14} />}>
