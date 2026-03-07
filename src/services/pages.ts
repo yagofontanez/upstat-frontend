@@ -10,6 +10,7 @@ export async function updatePage(data: {
   description?: string;
   slug?: string;
   monitor_ids?: string[];
+  logo_base64?: string | null;
 }) {
   const res = await api.put("/page", data);
   return res.data.page;

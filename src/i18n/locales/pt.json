@@ -357,7 +357,12 @@
     "description": "Descrição",
     "description_placeholder": "Acompanhe o status dos nossos serviços.",
     "monitors": "Monitores exibidos",
-    "0_monitors": "Nenhum monitor cadastrado ainda."
+    "0_monitors": "Nenhum monitor cadastrado ainda.",
+    "alert": "Imagem muito grande. Máximo 2MB.",
+    "logo": "Logo carregada",
+    "logo_2": "Nenhuma logo",
+    "choose": "Escolher arquivo",
+    "types": "PNG, JPG ou SVG · máx 2MB"
   },
   "status_page": {
     "time_ago": {

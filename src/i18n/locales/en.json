@@ -357,7 +357,12 @@
     "description": "Description",
     "description_placeholder": "Follow the status of our services.",
     "monitors": "Displayed monitors",
-    "0_monitors": "No monitors registered yet."
+    "0_monitors": "No monitors registered yet.",
+    "alert": "Very large image. Maximum 2MB.",
+    "logo": "Logo loaded",
+    "logo_2": "No logo",
+    "choose": "Choose file",
+    "types": "PNG, JPG or SVG · max 2MB"
   },
   "status_page": {
     "time_ago": {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
 import { getMyPage, updatePage } from "../services/pages";
@@ -9,6 +10,7 @@ import {
   isPushSubscribed,
 } from "../services/push";
 import { useTranslation } from "react-i18next";
+import { Upload, X } from "lucide-react";
 
 function Toggle({
   enabled,
@@ -89,6 +91,9 @@ function Section({
 export function SettingsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [emailEnabled, setEmailEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -112,6 +117,7 @@ export function SettingsPage() {
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
   const [whatsappSuccess, setWhatsappSuccess] = useState(false);
+  const [logoBase64, setLogoBase64] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -136,9 +142,22 @@ export function SettingsPage() {
           notifRes.data.notifications.whatsapp_enabled ?? false,
         );
         setWhatsappNumber(notifRes.data.notifications.whatsapp_number ?? "");
+        setLogoBase64(page.logo_base64 ?? null);
       })
       .finally(() => setLoading(false));
   }, []);
+
+  function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert(t("settings.alert"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setLogoBase64(reader.result as string);
+    reader.readAsDataURL(file);
+  }
 
   async function handleTogglePush() {
     setPushLoading(true);
@@ -208,6 +227,7 @@ export function SettingsPage() {
         description: pageDescription,
         slug: pageSlug !== originalSlug ? pageSlug : undefined,
         monitor_ids: selectedMonitorIds,
+        logo_base64: logoBase64 ?? null,
       });
       setOriginalSlug(pageSlug);
       setPageSuccess(true);
@@ -294,6 +314,8 @@ export function SettingsPage() {
         .input-focus:focus { border-color: #00D4AA !important; box-shadow: 0 0 0 3px rgba(0,212,170,0.08) !important; }
         .monitor-check:hover { border-color: rgba(0,212,170,0.3) !important; }
         .monitor-check { transition: border-color 0.15s; }
+        .logo-upload:hover { border-color: rgba(0,212,170,0.3) !important; background: rgba(0,212,170,0.03) !important; }
+        .logo-upload { transition: all 0.15s; }
       `}</style>
 
       <div className="set-fade" style={{ marginBottom: "28px" }}>
@@ -793,6 +815,105 @@ export function SettingsPage() {
               </div>
             )}
 
+            <div style={{ marginBottom: "20px" }}>
+              <label style={labelStyle}>Logo</label>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "14px" }}
+              >
+                {logoBase64 ? (
+                  <div style={{ position: "relative" }}>
+                    <img
+                      src={logoBase64}
+                      alt="logo"
+                      style={{
+                        width: "56px",
+                        height: "56px",
+                        borderRadius: "10px",
+                        objectFit: "contain",
+                        background: "#060810",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    />
+                    <button
+                      onClick={() => setLogoBase64(null)}
+                      style={{
+                        position: "absolute",
+                        top: "-6px",
+                        right: "-6px",
+                        width: "18px",
+                        height: "18px",
+                        borderRadius: "50%",
+                        background: "#EF4444",
+                        border: "none",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <X size={10} color="#fff" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="logo-upload"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      width: "56px",
+                      height: "56px",
+                      borderRadius: "10px",
+                      background: "#060810",
+                      border: "1px dashed rgba(255,255,255,0.12)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Upload size={16} color="#555" />
+                  </div>
+                )}
+                <div>
+                  <p
+                    style={{
+                      color: "#F0F6FC",
+                      fontSize: "12px",
+                      margin: "0 0 4px",
+                    }}
+                  >
+                    {logoBase64 ? t("settings.logo") : t("settings.logo_2")}
+                  </p>
+                  <p style={{ color: "#555", fontSize: "11px", margin: 0 }}>
+                    {t("settings.types")}
+                  </p>
+                  {!logoBase64 && (
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        marginTop: "6px",
+                        background: "none",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: "6px",
+                        padding: "4px 10px",
+                        cursor: "pointer",
+                        color: "#8B949E",
+                        fontSize: "11px",
+                        fontFamily: "'JetBrains Mono', monospace",
+                      }}
+                    >
+                      {t("settings.choose")}
+                    </button>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                  style={{ display: "none" }}
+                />
+              </div>
+            </div>
             <div
               style={{
                 display: "grid",

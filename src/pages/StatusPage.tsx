@@ -35,7 +35,12 @@ interface Incident {
 }
 
 interface PageData {
-  page: { title: string; description: string | null; slug: string };
+  page: {
+    title: string;
+    description: string | null;
+    slug: string;
+    logo_base64?: string | null;
+  };
   overall_status: "operational" | "degraded" | "down";
   monitors: MonitorPublic[];
   incidents: Incident[];
@@ -303,6 +308,26 @@ export function StatusPage() {
           >
             ● UpStat
           </div>
+          {page.logo_base64 ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: "16px",
+              }}
+            >
+              <img
+                src={page.logo_base64}
+                alt={page.title}
+                style={{
+                  height: "52px",
+                  maxWidth: "180px",
+                  objectFit: "contain",
+                  borderRadius: "10px",
+                }}
+              />
+            </div>
+          ) : null}
           <h1
             style={{
               color: "#F0F6FC",
