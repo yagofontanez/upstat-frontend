@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import {
   Trash2,
@@ -10,10 +11,12 @@ import {
   Play,
   Zap,
   Activity,
+  Pencil,
 } from "lucide-react";
 import {
   getMonitors,
   createMonitor,
+  updateMonitor,
   deleteMonitor,
   toggleMonitor,
   type Monitor,
@@ -86,37 +89,109 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+type MonitorFormData = {
+  name: string;
+  url: string;
+  keyword: string;
+  monitorType: "http" | "tcp";
+  tcpPort: string;
+  slaTarget: string;
+  httpMethod: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD";
+  requestBody: string;
+  requestHeaders: string;
+};
+
+const emptyForm: MonitorFormData = {
+  name: "",
+  url: "",
+  keyword: "",
+  monitorType: "http",
+  tcpPort: "",
+  slaTarget: "99.9",
+  httpMethod: "GET",
+  requestBody: "",
+  requestHeaders: "",
+};
+
+function monitorToForm(m: Monitor): MonitorFormData {
+  return {
+    name: m.name,
+    url: m.url,
+    keyword: m.keyword ?? "",
+    monitorType: m.monitor_type ?? "http",
+    tcpPort: m.tcp_port ? String(m.tcp_port) : "",
+    slaTarget: m.sla_target ? String(parseFloat(m.sla_target)) : "99.9",
+    httpMethod: (m.http_method as MonitorFormData["httpMethod"]) ?? "GET",
+    requestBody: m.request_body ?? "",
+    requestHeaders: m.request_headers
+      ? Object.entries(m.request_headers)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join("\n")
+      : "",
+  };
+}
+
 export function MonitorsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [pinging, setPinging] = useState<string | null>(null);
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [editingMonitor, setEditingMonitor] = useState<Monitor | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshed, setRefreshed] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showKeywordTip, setShowKeywordTip] = useState(false);
-  const [name, setName] = useState("");
-  const [url, setUrl] = useState("");
-  const [keyword, setKeyword] = useState("");
-  const [monitorType, setMonitorType] = useState<"http" | "tcp">("http");
-  const [tcpPort, setTcpPort] = useState("");
-  const [slaTarget, setSlaTarget] = useState("99.9");
-  const [httpMethod, setHttpMethod] = useState<
-    "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD"
-  >("GET");
-  const [requestBody, setRequestBody] = useState("");
-  const [requestHeaders, setRequestHeaders] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState("");
+  const [form, setForm] = useState<MonitorFormData>(emptyForm);
 
   useEffect(() => {
     getMonitors()
       .then(setMonitors)
       .finally(() => setLoading(false));
   }, []);
+
+  function openCreate() {
+    setEditingMonitor(null);
+    setForm(emptyForm);
+    setShowAdvanced(false);
+    setError("");
+    setShowForm(true);
+  }
+
+  function openEdit(monitor: Monitor) {
+    setEditingMonitor(monitor);
+    const f = monitorToForm(monitor);
+    setForm(f);
+    setShowAdvanced(!!(f.requestHeaders || f.requestBody));
+    setError("");
+    setShowForm(true);
+  }
+
+  function closeForm() {
+    setShowForm(false);
+    setEditingMonitor(null);
+    setForm(emptyForm);
+    setError("");
+  }
+
+  function headersStringToRecord(
+    str: string,
+  ): Record<string, string> | undefined {
+    if (!str.trim()) return undefined;
+    return Object.fromEntries(
+      str
+        .split("\n")
+        .filter((l) => l.includes(":"))
+        .map((l) => [
+          l.split(":")[0].trim(),
+          l.split(":").slice(1).join(":").trim(),
+        ]),
+    );
+  }
 
   async function handlePingNow(id: string) {
     setPinging(id);
@@ -148,54 +223,52 @@ export function MonitorsPage() {
     );
   }
 
-  async function handleCreate(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setCreating(true);
+    setSubmitting(true);
+
+    const payload = {
+      name: form.name,
+      url: form.url,
+      keyword: form.keyword || undefined,
+      monitor_type: form.monitorType,
+      tcp_port: form.tcpPort ? parseInt(form.tcpPort) : undefined,
+      sla_target: parseFloat(form.slaTarget) || 99.9,
+      http_method: form.httpMethod,
+      request_body: form.requestBody || undefined,
+      request_headers: headersStringToRecord(form.requestHeaders),
+    };
+
     try {
-      const monitor = await createMonitor({
-        name,
-        url,
-        keyword: keyword || undefined,
-        monitor_type: monitorType,
-        tcp_port: tcpPort ? parseInt(tcpPort) : undefined,
-        sla_target: parseFloat(slaTarget) || 99.9,
-        http_method: httpMethod,
-        request_body: requestBody || undefined,
-        request_headers: requestHeaders
-          ? Object.fromEntries(
-              requestHeaders
-                .split("\n")
-                .filter((l) => l.includes(":"))
-                .map((l) => [
-                  l.split(":")[0].trim(),
-                  l.split(":").slice(1).join(":").trim(),
-                ]),
-            )
-          : undefined,
-      });
-      setMonitors((prev) => [...prev, monitor]);
-      setName("");
-      setUrl("");
-      setKeyword("");
-      setMonitorType("http");
-      setTcpPort("");
-      setSlaTarget("99.9");
-      setShowForm(false);
-      setHttpMethod("GET");
-      setRequestBody("");
-      setRequestHeaders("");
-      setShowAdvanced(false);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (editingMonitor) {
+        const updated = await updateMonitor(editingMonitor.id, payload);
+        setMonitors((prev) =>
+          prev.map((m) => (m.id === editingMonitor.id ? updated : m)),
+        );
+      } else {
+        const monitor = await createMonitor(payload);
+        setMonitors((prev) => [...prev, monitor]);
+
+        setPinging(monitor.id);
+        try {
+          await pingNow(monitor.id);
+          const data = await getMonitors();
+          setMonitors(data);
+        } finally {
+          setPinging(null);
+        }
+      }
+      closeForm();
     } catch (err: any) {
       if (err.response?.status === 403) {
-        setShowForm(false);
+        closeForm();
         setShowUpgradeModal(true);
       } else {
-        setError(err.response?.data?.error || "Erro ao criar monitor");
+        setError(err.response?.data?.error || "Erro ao salvar monitor");
       }
     } finally {
-      setCreating(false);
+      setSubmitting(false);
     }
   }
 
@@ -267,12 +340,10 @@ export function MonitorsPage() {
         .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .input-focus:focus { border-color: #00D4AA !important; box-shadow: 0 0 0 3px rgba(0,212,170,0.08) !important; outline: none !important; }
 
-        .mon-table-header { display: grid; grid-template-columns: 1fr 110px 90px 90px 300px; align-items: center; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-        .mon-table-row { display: grid; grid-template-columns: 1fr 110px 90px 90px 300px; align-items: center; padding: 14px 20px; }
+        .mon-table-header { display: grid; grid-template-columns: 1fr 110px 90px 90px auto; align-items: center; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .mon-table-row { display: grid; grid-template-columns: 1fr 110px 90px 90px auto; align-items: center; padding: 14px 20px; }
         .mon-mobile-row { display: none; padding: 14px 20px; }
-
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
         .mon-header-actions { display: flex; align-items: center; gap: 10px; }
         .mon-header-refresh-label { display: inline; }
 
@@ -342,7 +413,7 @@ export function MonitorsPage() {
             </span>
           </button>
           <button
-            onClick={() => setShowForm(!showForm)}
+            onClick={openCreate}
             style={{
               display: "flex",
               alignItems: "center",
@@ -366,11 +437,11 @@ export function MonitorsPage() {
 
       {showForm && (
         <form
-          onSubmit={handleCreate}
+          onSubmit={handleSubmit}
           className="mon-fade"
           style={{
             background: "#0D1117",
-            border: "1px solid rgba(0,212,170,0.2)",
+            border: `1px solid ${editingMonitor ? "rgba(255,255,255,0.1)" : "rgba(0,212,170,0.2)"}`,
             borderRadius: "12px",
             padding: "24px",
             marginBottom: "20px",
@@ -387,11 +458,13 @@ export function MonitorsPage() {
             <span
               style={{ fontSize: "13px", fontWeight: 700, color: "#F0F6FC" }}
             >
-              Novo monitor
+              {editingMonitor
+                ? `Editando: ${editingMonitor.name}`
+                : "Novo monitor"}
             </span>
             <button
               type="button"
-              onClick={() => setShowForm(false)}
+              onClick={closeForm}
               style={{
                 background: "none",
                 border: "none",
@@ -425,8 +498,8 @@ export function MonitorsPage() {
               <label style={labelStyle}>Nome</label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 style={inputStyle}
                 className="input-focus"
                 placeholder="Minha API"
@@ -440,7 +513,7 @@ export function MonitorsPage() {
                   <button
                     key={t}
                     type="button"
-                    onClick={() => setMonitorType(t)}
+                    onClick={() => setForm({ ...form, monitorType: t })}
                     style={{
                       flex: 1,
                       padding: "10px",
@@ -452,10 +525,10 @@ export function MonitorsPage() {
                       fontWeight: 700,
                       transition: "all 0.15s",
                       background:
-                        monitorType === t
+                        form.monitorType === t
                           ? "#00D4AA"
                           : "rgba(255,255,255,0.04)",
-                      color: monitorType === t ? "#000" : "#555",
+                      color: form.monitorType === t ? "#000" : "#555",
                     }}
                   >
                     {t.toUpperCase()}
@@ -467,28 +540,30 @@ export function MonitorsPage() {
               <label style={labelStyle}>URL</label>
               <input
                 type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                value={form.url}
+                onChange={(e) => setForm({ ...form, url: e.target.value })}
                 style={inputStyle}
                 className="input-focus"
                 placeholder="https://minha-api.com/health"
                 required
               />
             </div>
-            {monitorType === "tcp" && (
+            {form.monitorType === "tcp" && (
               <div>
                 <label style={labelStyle}>Porta</label>
                 <input
                   type="number"
-                  value={tcpPort}
-                  onChange={(e) => setTcpPort(e.target.value)}
+                  value={form.tcpPort}
+                  onChange={(e) =>
+                    setForm({ ...form, tcpPort: e.target.value })
+                  }
                   style={inputStyle}
                   className="input-focus"
                   placeholder="ex: 5432"
                 />
               </div>
             )}
-            {monitorType === "http" && (
+            {form.monitorType === "http" && (
               <div>
                 <label
                   style={{
@@ -555,15 +630,17 @@ export function MonitorsPage() {
                 </label>
                 <input
                   type="text"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
+                  value={form.keyword}
+                  onChange={(e) =>
+                    setForm({ ...form, keyword: e.target.value })
+                  }
                   style={inputStyle}
                   className="input-focus"
                   placeholder='"operational" ou "ok"'
                 />
               </div>
             )}
-            {monitorType === "http" && (
+            {form.monitorType === "http" && (
               <>
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={labelStyle}>Método HTTP</label>
@@ -576,7 +653,7 @@ export function MonitorsPage() {
                       <button
                         key={m}
                         type="button"
-                        onClick={() => setHttpMethod(m)}
+                        onClick={() => setForm({ ...form, httpMethod: m })}
                         style={{
                           padding: "6px 12px",
                           borderRadius: "6px",
@@ -587,10 +664,10 @@ export function MonitorsPage() {
                           fontWeight: 700,
                           transition: "all 0.15s",
                           background:
-                            httpMethod === m
+                            form.httpMethod === m
                               ? "#00D4AA"
                               : "rgba(255,255,255,0.04)",
-                          color: httpMethod === m ? "#000" : "#555",
+                          color: form.httpMethod === m ? "#000" : "#555",
                         }}
                       >
                         {m}
@@ -637,8 +714,10 @@ export function MonitorsPage() {
                         </span>
                       </label>
                       <textarea
-                        value={requestHeaders}
-                        onChange={(e) => setRequestHeaders(e.target.value)}
+                        value={form.requestHeaders}
+                        onChange={(e) =>
+                          setForm({ ...form, requestHeaders: e.target.value })
+                        }
                         style={{
                           ...inputStyle,
                           height: "80px",
@@ -650,7 +729,7 @@ export function MonitorsPage() {
                         }
                       />
                     </div>
-                    {["POST", "PUT", "PATCH"].includes(httpMethod) && (
+                    {["POST", "PUT", "PATCH"].includes(form.httpMethod) && (
                       <div style={{ gridColumn: "1 / -1" }}>
                         <div
                           style={{
@@ -676,8 +755,14 @@ export function MonitorsPage() {
                             type="button"
                             onClick={() => {
                               try {
-                                const parsed = JSON.parse(requestBody);
-                                setRequestBody(JSON.stringify(parsed, null, 2));
+                                setForm({
+                                  ...form,
+                                  requestBody: JSON.stringify(
+                                    JSON.parse(form.requestBody),
+                                    null,
+                                    2,
+                                  ),
+                                });
                               } catch {
                                 window.alert("JSON Inválido.");
                               }
@@ -692,15 +777,16 @@ export function MonitorsPage() {
                               fontSize: "10px",
                               fontFamily: "'JetBrains Mono', monospace",
                               fontWeight: 700,
-                              letterSpacing: "0.5px",
                             }}
                           >
                             ✦ beautify
                           </button>
                         </div>
                         <textarea
-                          value={requestBody}
-                          onChange={(e) => setRequestBody(e.target.value)}
+                          value={form.requestBody}
+                          onChange={(e) =>
+                            setForm({ ...form, requestBody: e.target.value })
+                          }
                           style={{
                             ...inputStyle,
                             height: "80px",
@@ -720,8 +806,10 @@ export function MonitorsPage() {
                 <label style={labelStyle}>Meta de SLA (%)</label>
                 <input
                   type="number"
-                  value={slaTarget}
-                  onChange={(e) => setSlaTarget(e.target.value)}
+                  value={form.slaTarget}
+                  onChange={(e) =>
+                    setForm({ ...form, slaTarget: e.target.value })
+                  }
                   style={inputStyle}
                   className="input-focus"
                   placeholder="99.9"
@@ -736,7 +824,7 @@ export function MonitorsPage() {
           <div style={{ display: "flex", gap: "10px" }}>
             <button
               type="submit"
-              disabled={creating}
+              disabled={submitting}
               style={{
                 background: "#00D4AA",
                 border: "none",
@@ -747,14 +835,20 @@ export function MonitorsPage() {
                 fontSize: "12px",
                 fontWeight: 700,
                 fontFamily: "'JetBrains Mono', monospace",
-                opacity: creating ? 0.5 : 1,
+                opacity: submitting ? 0.5 : 1,
               }}
             >
-              {creating ? "Criando..." : "Criar monitor"}
+              {submitting
+                ? editingMonitor
+                  ? "Salvando..."
+                  : "Criando..."
+                : editingMonitor
+                  ? "Salvar alterações"
+                  : "Criar monitor"}
             </button>
             <button
               type="button"
-              onClick={() => setShowForm(false)}
+              onClick={closeForm}
               style={{
                 background: "none",
                 border: "none",
@@ -818,7 +912,7 @@ export function MonitorsPage() {
               Nenhum monitor ainda.
             </p>
             <button
-              onClick={() => setShowForm(true)}
+              onClick={openCreate}
               style={{
                 background: "none",
                 border: "none",
@@ -847,6 +941,7 @@ export function MonitorsPage() {
 
             return (
               <div key={monitor.id}>
+                {/* Desktop row */}
                 <div
                   className="monitor-card mon-table-row"
                   style={{ borderBottom, opacity: monitor.is_active ? 1 : 0.5 }}
@@ -967,9 +1062,9 @@ export function MonitorsPage() {
                       onClick={() => handlePingNow(monitor.id)}
                       disabled={pinging === monitor.id}
                       style={{
-                        color: "#555",
+                        color: "#bbbbbb",
                         background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.08)",
                         borderRadius: "6px",
                         padding: "5px 10px",
                       }}
@@ -979,9 +1074,9 @@ export function MonitorsPage() {
                           "rgba(0,212,170,0.2)";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.color = "#555";
+                        e.currentTarget.style.color = "#bbbbbb";
                         e.currentTarget.style.borderColor =
-                          "rgba(255,255,255,0.06)";
+                          "rgba(255,255,255,0.09)";
                       }}
                     >
                       <Zap size={11} />
@@ -993,9 +1088,9 @@ export function MonitorsPage() {
                         handleToggle(monitor.id, monitor.is_active)
                       }
                       style={{
-                        color: monitor.is_active ? "#555" : "#F59E0B",
+                        color: monitor.is_active ? "#bbbbbb" : "#F59E0B",
                         background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.09)",
                         borderRadius: "6px",
                         padding: "5px 10px",
                       }}
@@ -1008,10 +1103,10 @@ export function MonitorsPage() {
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.color = monitor.is_active
-                          ? "#555"
+                          ? "#bbbbbb"
                           : "#F59E0B";
                         e.currentTarget.style.borderColor =
-                          "rgba(255,255,255,0.06)";
+                          "rgba(255,255,255,0.09)";
                       }}
                     >
                       {monitor.is_active ? (
@@ -1023,11 +1118,11 @@ export function MonitorsPage() {
                     </button>
                     <button
                       className="icon-btn"
-                      onClick={() => navigate(`/monitors/${monitor.id}`)}
+                      onClick={() => openEdit(monitor)}
                       style={{
-                        color: "#555",
+                        color: "#bbbbbb",
                         background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.09)",
                         borderRadius: "6px",
                         padding: "5px 10px",
                       }}
@@ -1037,9 +1132,33 @@ export function MonitorsPage() {
                           "rgba(255,255,255,0.12)";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.color = "#555";
+                        e.currentTarget.style.color = "#bbbbbb";
                         e.currentTarget.style.borderColor =
-                          "rgba(255,255,255,0.06)";
+                          "rgba(255,255,255,0.09)";
+                      }}
+                    >
+                      <Pencil size={11} />
+                      Editar
+                    </button>
+                    <button
+                      className="icon-btn"
+                      onClick={() => navigate(`/monitors/${monitor.id}`)}
+                      style={{
+                        color: "#bbbbbb",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.09)",
+                        borderRadius: "6px",
+                        padding: "5px 10px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = "#F0F6FC";
+                        e.currentTarget.style.borderColor =
+                          "rgba(255,255,255,0.12)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = "#bbbbbb";
+                        e.currentTarget.style.borderColor =
+                          "rgba(255,255,255,0.09)";
                       }}
                     >
                       Detalhes
@@ -1080,6 +1199,7 @@ export function MonitorsPage() {
                   </div>
                 </div>
 
+                {/* Mobile row */}
                 <div
                   className="monitor-card mon-mobile-row"
                   style={{ borderBottom, opacity: monitor.is_active ? 1 : 0.5 }}
@@ -1140,7 +1260,6 @@ export function MonitorsPage() {
                     </div>
                     <StatusBadge status={monitor.status} />
                   </div>
-
                   <div
                     style={{
                       display: "flex",
@@ -1192,9 +1311,9 @@ export function MonitorsPage() {
                         onClick={() => handlePingNow(monitor.id)}
                         disabled={pinging === monitor.id}
                         style={{
-                          color: "#555",
+                          color: "#bbbbbb",
                           background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.09)",
                           borderRadius: "6px",
                           padding: "5px 10px",
                         }}
@@ -1202,7 +1321,7 @@ export function MonitorsPage() {
                           e.currentTarget.style.color = "#00D4AA";
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.color = "#555";
+                          e.currentTarget.style.color = "#bbbbbb";
                         }}
                       >
                         <Zap size={11} />
@@ -1210,11 +1329,11 @@ export function MonitorsPage() {
                       </button>
                       <button
                         className="icon-btn"
-                        onClick={() => navigate(`/monitors/${monitor.id}`)}
+                        onClick={() => openEdit(monitor)}
                         style={{
-                          color: "#555",
+                          color: "#bbbbbb",
                           background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.09)",
                           borderRadius: "6px",
                           padding: "5px 10px",
                         }}
@@ -1222,7 +1341,27 @@ export function MonitorsPage() {
                           e.currentTarget.style.color = "#F0F6FC";
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.color = "#555";
+                          e.currentTarget.style.color = "#bbbbbb";
+                        }}
+                      >
+                        <Pencil size={11} />
+                        Editar
+                      </button>
+                      <button
+                        className="icon-btn"
+                        onClick={() => navigate(`/monitors/${monitor.id}`)}
+                        style={{
+                          color: "#bbbbbb",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.09)",
+                          borderRadius: "6px",
+                          padding: "5px 10px",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = "#F0F6FC";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = "#bbbbbb";
                         }}
                       >
                         Detalhes

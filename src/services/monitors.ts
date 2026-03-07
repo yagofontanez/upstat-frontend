@@ -19,6 +19,10 @@ export interface Monitor {
   dns_checked_at: string | null;
   monitor_type: "http" | "tcp";
   tcp_port: number | null;
+  sla_target: string | null;
+  http_method: string | null;
+  request_body: string | null;
+  request_headers: Record<string, string> | null;
 }
 
 export async function getMonitors() {
@@ -57,4 +61,22 @@ export async function pingNow(id: string) {
     status_code: number | null;
     latency_ms: number | null;
   };
+}
+
+export async function updateMonitor(
+  id: string,
+  data: {
+    name?: string;
+    url?: string;
+    keyword?: string;
+    monitor_type?: "http" | "tcp";
+    tcp_port?: number;
+    sla_target?: number;
+    http_method?: string;
+    request_body?: string;
+    request_headers?: Record<string, string>;
+  },
+) {
+  const res = await api.put(`/monitors/${id}`, data);
+  return res.data.monitor as Monitor;
 }
