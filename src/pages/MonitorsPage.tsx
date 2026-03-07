@@ -104,6 +104,12 @@ export function MonitorsPage() {
   const [monitorType, setMonitorType] = useState<"http" | "tcp">("http");
   const [tcpPort, setTcpPort] = useState("");
   const [slaTarget, setSlaTarget] = useState("99.9");
+  const [httpMethod, setHttpMethod] = useState<
+    "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD"
+  >("GET");
+  const [requestBody, setRequestBody] = useState("");
+  const [requestHeaders, setRequestHeaders] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -154,6 +160,19 @@ export function MonitorsPage() {
         monitor_type: monitorType,
         tcp_port: tcpPort ? parseInt(tcpPort) : undefined,
         sla_target: parseFloat(slaTarget) || 99.9,
+        http_method: httpMethod,
+        request_body: requestBody || undefined,
+        request_headers: requestHeaders
+          ? Object.fromEntries(
+              requestHeaders
+                .split("\n")
+                .filter((l) => l.includes(":"))
+                .map((l) => [
+                  l.split(":")[0].trim(),
+                  l.split(":").slice(1).join(":").trim(),
+                ]),
+            )
+          : undefined,
       });
       setMonitors((prev) => [...prev, monitor]);
       setName("");
@@ -163,6 +182,10 @@ export function MonitorsPage() {
       setTcpPort("");
       setSlaTarget("99.9");
       setShowForm(false);
+      setHttpMethod("GET");
+      setRequestBody("");
+      setRequestHeaders("");
+      setShowAdvanced(false);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err.response?.status === 403) {
@@ -539,6 +562,158 @@ export function MonitorsPage() {
                   placeholder='"operational" ou "ok"'
                 />
               </div>
+            )}
+            {monitorType === "http" && (
+              <>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label style={labelStyle}>Método HTTP</label>
+                  <div
+                    style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}
+                  >
+                    {(
+                      ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"] as const
+                    ).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setHttpMethod(m)}
+                        style={{
+                          padding: "6px 12px",
+                          borderRadius: "6px",
+                          border: "none",
+                          cursor: "pointer",
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          transition: "all 0.15s",
+                          background:
+                            httpMethod === m
+                              ? "#00D4AA"
+                              : "rgba(255,255,255,0.04)",
+                          color: httpMethod === m ? "#000" : "#555",
+                        }}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#555",
+                      fontSize: "11px",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: 0,
+                    }}
+                  >
+                    {showAdvanced ? "▾" : "▸"} Configurações avançadas (headers
+                    e body)
+                  </button>
+                </div>
+
+                {showAdvanced && (
+                  <>
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <label style={labelStyle}>
+                        Headers{" "}
+                        <span
+                          style={{
+                            color: "#333",
+                            textTransform: "none",
+                            letterSpacing: 0,
+                          }}
+                        >
+                          (opcional, um por linha: Key: Value)
+                        </span>
+                      </label>
+                      <textarea
+                        value={requestHeaders}
+                        onChange={(e) => setRequestHeaders(e.target.value)}
+                        style={{
+                          ...inputStyle,
+                          height: "80px",
+                          resize: "vertical",
+                        }}
+                        className="input-focus"
+                        placeholder={
+                          "Authorization: Bearer token\nContent-Type: application/json"
+                        }
+                      />
+                    </div>
+                    {["POST", "PUT", "PATCH"].includes(httpMethod) && (
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          <label style={{ ...labelStyle, marginBottom: 0 }}>
+                            Body{" "}
+                            <span
+                              style={{
+                                color: "#333",
+                                textTransform: "none",
+                                letterSpacing: 0,
+                              }}
+                            >
+                              (opcional)
+                            </span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              try {
+                                const parsed = JSON.parse(requestBody);
+                                setRequestBody(JSON.stringify(parsed, null, 2));
+                              } catch {
+                                window.alert("JSON Inválido.");
+                              }
+                            }}
+                            style={{
+                              background: "none",
+                              border: "1px solid rgba(0,212,170,0.2)",
+                              borderRadius: "6px",
+                              padding: "3px 10px",
+                              cursor: "pointer",
+                              color: "#00D4AA",
+                              fontSize: "10px",
+                              fontFamily: "'JetBrains Mono', monospace",
+                              fontWeight: 700,
+                              letterSpacing: "0.5px",
+                            }}
+                          >
+                            ✦ beautify
+                          </button>
+                        </div>
+                        <textarea
+                          value={requestBody}
+                          onChange={(e) => setRequestBody(e.target.value)}
+                          style={{
+                            ...inputStyle,
+                            height: "80px",
+                            resize: "vertical",
+                          }}
+                          className="input-focus"
+                          placeholder={'{"key": "value"}'}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
             )}
             {user?.plan === "pro" && (
               <div>
