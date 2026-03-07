@@ -11,6 +11,8 @@ import { StatusPage } from "./pages/StatusPage";
 import { BillingPage } from "./pages/BillingPage";
 import { MonitorDetailPage } from "./pages/MonitorDetailPage";
 import { DependenciesPage } from "./pages/DepenciesPage";
+import SyntheticPage from "./pages/SyntheticPage";
+import OAuthCallbackPage from "./pages/OAuthCallbackPage";
 
 export default function App() {
   return (
@@ -77,8 +79,19 @@ export default function App() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/synthetic"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <SyntheticPage />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/status/:slug" element={<StatusPage />} />
+      <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
     </Routes>
   );
 }

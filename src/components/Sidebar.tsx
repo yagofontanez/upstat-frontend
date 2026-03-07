@@ -6,6 +6,7 @@ import {
   LogOut,
   Zap,
   GitBranch,
+  FlaskConical,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
@@ -14,6 +15,7 @@ const navItems = [
   { label: "Monitores", icon: Activity, path: "/monitors" },
   { label: "Plano", icon: Zap, path: "/billing" },
   { label: "Dependências", icon: GitBranch, path: "/dependencies" },
+  { label: "Monitores Sintéticos", icon: FlaskConical, path: "/synthetic" },
   { label: "Configurações", icon: Settings, path: "/settings" },
 ];
 
