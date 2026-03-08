@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 
 export function SupportWidget() {
   const { t } = useTranslation();
+  const location = useLocation();
+
   const [showLabel, setShowLabel] = useState(false);
 
   const phone = "5514982258397";
@@ -10,6 +13,8 @@ export function SupportWidget() {
     "Olá! Vim do UpStat e gostaria de suporte.",
   );
   const url = `https://wa.me/${phone}?text=${message}`;
+
+  if (location.pathname.startsWith("/status/")) return null;
 
   return (
     <>
