@@ -118,6 +118,8 @@ export function SettingsPage() {
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
   const [whatsappSuccess, setWhatsappSuccess] = useState(false);
   const [logoBase64, setLogoBase64] = useState<string | null>(null);
+  const [canceling, setCanceling] = useState(false);
+  const [cancelModal, setCancelModal] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -157,6 +159,19 @@ export function SettingsPage() {
     const reader = new FileReader();
     reader.onload = () => setLogoBase64(reader.result as string);
     reader.readAsDataURL(file);
+  }
+
+  async function handleCancelPlan() {
+    setCanceling(true);
+
+    try {
+      await api.post("/billing/cancel");
+      window.location.reload();
+    } catch {
+      alert(t("settings.cancel_error"));
+    } finally {
+      setCanceling(false);
+    }
   }
 
   async function handleTogglePush() {
@@ -396,6 +411,24 @@ export function SettingsPage() {
               <span style={{ fontSize: "11px", color: "#bbbbbb" }}>
                 {t("settings.do_upgrade")}
               </span>
+            )}
+            {user?.plan === "pro" && (
+              <button
+                onClick={() => setCancelModal(true)}
+                style={{
+                  marginLeft: "auto",
+                  background: "none",
+                  border: "1px solid rgba(239,68,68,0.3)",
+                  borderRadius: "8px",
+                  padding: "6px 14px",
+                  cursor: "pointer",
+                  color: "#EF4444",
+                  fontSize: "11px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                {t("settings.cancel")}
+              </button>
             )}
           </div>
         </Section>
@@ -1087,6 +1120,92 @@ export function SettingsPage() {
           </div>
         </div>
       </div>
+      {cancelModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.7)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px",
+          }}
+        >
+          <div
+            style={{
+              background: "#0D1117",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "16px",
+              padding: "28px",
+              maxWidth: "380px",
+              width: "100%",
+            }}
+          >
+            <h3
+              style={{
+                color: "#F0F6FC",
+                fontSize: "16px",
+                fontWeight: 700,
+                margin: "0 0 10px",
+              }}
+            >
+              {t("settings.confirm_cancel")}
+            </h3>
+            <p
+              style={{
+                color: "#8B949E",
+                fontSize: "12px",
+                lineHeight: 1.7,
+                margin: "0 0 24px",
+              }}
+            >
+              {t("settings.confirm_cancel_desc")}
+            </p>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={() => setCancelModal(false)}
+                style={{
+                  flex: 1,
+                  background: "none",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  color: "#8B949E",
+                  fontSize: "12px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                {t("settings.no_cancel")}
+              </button>
+              <button
+                onClick={() => {
+                  setCancelModal(false);
+                  handleCancelPlan();
+                }}
+                disabled={canceling}
+                style={{
+                  flex: 1,
+                  background: "rgba(239,68,68,0.1)",
+                  border: "1px solid rgba(239,68,68,0.3)",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  color: "#EF4444",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  opacity: canceling ? 0.5 : 1,
+                }}
+              >
+                {canceling ? t("settings.canceling") : t("settings.confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

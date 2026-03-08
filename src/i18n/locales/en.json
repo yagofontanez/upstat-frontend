@@ -362,7 +362,14 @@
     "logo": "Logo loaded",
     "logo_2": "No logo",
     "choose": "Choose file",
-    "types": "PNG, JPG or SVG · max 2MB"
+    "types": "PNG, JPG or SVG · max 2MB",
+    "cancel_error": "Error canceling. Try again.",
+    "cancel": "Cancel Plan",
+    "confirm_cancel": "Cancel Pro plan?",
+    "confirm_cancel_desc": "Your subscription will be cancelled on Asaas and you will be back on the Free plan immediately. Monitors above the limit of 10 will be deleted.",
+    "no_cancel": "Keep Plan",
+    "confirm": "Confirm cancellation",
+    "canceling": "Canceling..."
   },
   "status_page": {
     "time_ago": {

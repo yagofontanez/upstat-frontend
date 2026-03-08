@@ -362,7 +362,14 @@
     "logo": "Logo carregada",
     "logo_2": "Nenhuma logo",
     "choose": "Escolher arquivo",
-    "types": "PNG, JPG ou SVG · máx 2MB"
+    "types": "PNG, JPG ou SVG · máx 2MB",
+    "cancel_error": "Erro ao cancelar. Tente novamente.",
+    "cancel": "Cancelar Plano",
+    "confirm_cancel": "Cancelar plano Pro?",
+    "confirm_cancel_desc": "Sua assinatura será cancelada no Asaas e você voltará ao plano Free imediatamente. Monitores acima do limite de 10 serão deletados.",
+    "no_cancel": "Manter Plano",
+    "confirm": "Confirmar cancelamento",
+    "canceling": "Cancelando..."
   },
   "status_page": {
     "time_ago": {
