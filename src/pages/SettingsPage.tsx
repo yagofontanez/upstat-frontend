@@ -120,6 +120,8 @@ export function SettingsPage() {
   const [logoBase64, setLogoBase64] = useState<string | null>(null);
   const [canceling, setCanceling] = useState(false);
   const [cancelModal, setCancelModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -251,6 +253,18 @@ export function SettingsPage() {
       setPageError(t("settings.error"));
     } finally {
       setSavingPage(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    try {
+      await api.delete("/account");
+      window.location.href = "/login";
+    } catch {
+      alert(t("settings.error_delete"));
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -1120,6 +1134,164 @@ export function SettingsPage() {
           </div>
         </div>
       </div>
+
+      <div className="set-fade-7">
+        <div
+          style={{
+            background: "#0D1117",
+            border: "1px solid rgba(239,68,68,0.1)",
+            borderRadius: "12px",
+            overflow: "hidden",
+            marginBottom: "16px",
+          }}
+        >
+          <div
+            style={{
+              padding: "16px 20px",
+              borderBottom: "1px solid rgba(239,68,68,0.08)",
+            }}
+          >
+            <span
+              style={{ fontSize: "13px", fontWeight: 600, color: "#EF4444" }}
+            >
+              {t("settings.danger")}
+            </span>
+          </div>
+          <div style={{ padding: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <p
+                  style={{
+                    color: "#F0F6FC",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    margin: "0 0 4px",
+                  }}
+                >
+                  {t("settings.delete")}
+                </p>
+                <p style={{ color: "#8B949E", fontSize: "11px", margin: 0 }}>
+                  {t("settings.delete_2")}
+                </p>
+              </div>
+              <button
+                onClick={() => setDeleteModal(true)}
+                style={{
+                  flexShrink: 0,
+                  marginLeft: "24px",
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.3)",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  cursor: "pointer",
+                  color: "#EF4444",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                {t("settings.delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {deleteModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.7)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px",
+          }}
+        >
+          <div
+            style={{
+              background: "#0D1117",
+              border: "1px solid rgba(239,68,68,0.2)",
+              borderRadius: "16px",
+              padding: "28px",
+              maxWidth: "380px",
+              width: "100%",
+            }}
+          >
+            <h3
+              style={{
+                color: "#EF4444",
+                fontSize: "16px",
+                fontWeight: 700,
+                margin: "0 0 10px",
+              }}
+            >
+              {t("settings.question")}
+            </h3>
+            <p
+              style={{
+                color: "#8B949E",
+                fontSize: "12px",
+                lineHeight: 1.7,
+                margin: "0 0 24px",
+              }}
+            >
+              {t("settings.question_2")}
+            </p>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={() => setDeleteModal(false)}
+                style={{
+                  flex: 1,
+                  background: "none",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  color: "#8B949E",
+                  fontSize: "12px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                {t("settings.cancel_account")}
+              </button>
+              <button
+                onClick={() => {
+                  setDeleteModal(false);
+                  handleDeleteAccount();
+                }}
+                disabled={deleting}
+                style={{
+                  flex: 1,
+                  background: "rgba(239,68,68,0.1)",
+                  border: "1px solid rgba(239,68,68,0.3)",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  color: "#EF4444",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  opacity: deleting ? 0.5 : 1,
+                }}
+              >
+                {deleting
+                  ? t("settings.deleting")
+                  : t("settings.confirm_delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {cancelModal && (
         <div
           style={{

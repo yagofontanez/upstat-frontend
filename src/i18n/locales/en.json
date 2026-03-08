@@ -369,7 +369,16 @@
     "confirm_cancel_desc": "Your subscription will be cancelled on Asaas and you will be back on the Free plan immediately. Monitors above the limit of 10 will be deleted.",
     "no_cancel": "Keep Plan",
     "confirm": "Confirm cancellation",
-    "canceling": "Canceling..."
+    "canceling": "Canceling...",
+    "error_delete": "Error deleting account. Try again.",
+    "danger": "Danger zone",
+    "delete": "Delete account",
+    "delete_2": "Permanently removes your account and all data. This action cannot be undone.",
+    "question": "Delete account?",
+    "question_2": "All your monitors, ping history, incidents, and page status will be permanently deleted. Your Pro subscription will also be canceled. This action is irreversible.",
+    "cancel_account": "Cancel",
+    "deleting": "Deleting...",
+    "confirm_delete": "Confirm deletion"
   },
   "status_page": {
     "time_ago": {
@@ -399,5 +408,6 @@
     "resolved": "Resolved",
     "in_progress": "Ongoing"
   },
-  "authenticating": "Authenticating..."
+  "authenticating": "Authenticating...",
+  "support": "Support via WhatsApp"
 }

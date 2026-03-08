@@ -369,7 +369,16 @@
     "confirm_cancel_desc": "Sua assinatura será cancelada no Asaas e você voltará ao plano Free imediatamente. Monitores acima do limite de 10 serão deletados.",
     "no_cancel": "Manter Plano",
     "confirm": "Confirmar cancelamento",
-    "canceling": "Cancelando..."
+    "canceling": "Cancelando...",
+    "error_delete": "Erro ao excluir conta. Tente novamente.",
+    "danger": "Zona de perigo",
+    "delete": "Excluir conta",
+    "delete_2": "Remove permanentemente sua conta e todos os dados. Essa ação não pode ser desfeita.",
+    "question": "Excluir conta?",
+    "question_2": "Todos os seus monitores, histórico de pings, incidentes e status page serão permanentemente deletados. Sua assinatura Pro também será cancelada. Essa ação é irreversível.",
+    "cancel_account": "Cancelar",
+    "deleting": "Excluindo...",
+    "confirm_delete": "Confirmar exclusão"
   },
   "status_page": {
     "time_ago": {
@@ -399,5 +408,6 @@
     "resolved": "Resolvido",
     "in_progress": "Em andamento"
   },
-  "authenticating": "Autenticando..."
+  "authenticating": "Autenticando...",
+  "support": "Suporte via WhatsApp"
 }
